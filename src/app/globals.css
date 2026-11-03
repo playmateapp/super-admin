@@ -1,0 +1,242 @@
+/*
+ * PlayMate admin design tokens — values from the Figma file (page "dart me", admin frames,
+ * variables "Primary Color", "Title Color", "Paragraph Color", "Stroke Color", "BG Color" ...).
+ *
+ * This file is the ONLY place colour values live. Every token is an RGB triplet so
+ * Tailwind can apply opacity (`bg-brand-500/10`). Change a value here and it changes
+ * everywhere, in both themes. Tailwind names for each token are in `tailwind.config.ts`;
+ * the full table lives in `docs/DESIGN_SYSTEM.md`.
+ *
+ * Theme is switched by `data-theme="dark"` on <html> (next-themes, storage key
+ * `playmate-theme`). The Figma file only has a light theme; the dark values are derived.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* Surfaces */
+    --surface-page: 246 249 248; /* #F6F9F8 BG Color */
+    --surface-card: 255 255 255; /* #FFFFFF cards, sidebar, top bar */
+    --surface-sunken: 246 249 248; /* #F6F9F8 table header row */
+    --surface-muted: 242 242 247; /* #F2F2F7 input fill, inactive pill tabs, icon tiles */
+    --surface-inverse: 20 101 60; /* #14653C */
+    --surface-tint: 231 240 235; /* #E7F0EB Primary Color 10% — active nav, selected row */
+
+    /* Lines */
+    --line: 229 229 234; /* #E5E5EA Stroke Color */
+    --line-strong: 209 209 214; /* #D1D1D6 */
+    --line-brand: 20 101 60; /* #14653C focus */
+
+    /* Content (text + icons) */
+    --content-primary: 37 39 38; /* #252726 Title Color */
+    --content-secondary: 102 108 104; /* #666C68 table cells, ids */
+    --content-muted: 142 142 147; /* #8E8E93 Paragraph Color, placeholders */
+    --content-nav: 142 142 147; /* #8E8E93 sidebar items */
+    --content-brand: 20 101 60; /* #14653C */
+    --content-link: 0 136 255; /* #0088FF Blue — "Player" type */
+    --content-danger: 255 56 60; /* #FF383C */
+    --content-on-brand: 255 255 255;
+    --content-on-inverse: 255 255 255;
+
+    /* Brand */
+    --brand-500: 20 101 60; /* #14653C Primary Color */
+    --brand-400: 27 122 74; /* #1B7A4A hover */
+    --brand-300: 91 147 119; /* #5B9377 Primary Color 70% — chart bars */
+    --brand-bright: 16 208 75; /* #10D04B wordmark "Mate" */
+    --navy: 17 24 39; /* #111827 overlay ink */
+
+    /* Status tones: `x` = text/border, `x-soft` = fill (status pills) */
+    --success: 52 199 89; /* #34C759 */
+    --success-soft: 214 244 222; /* #D6F4DE */
+    --warning: 255 141 40; /* #FF8D28 */
+    --warning-soft: 255 232 212; /* #FFE8D4 */
+    --danger: 255 56 60; /* #FF383C */
+    --danger-soft: 255 215 216; /* #FFD7D8 */
+    --info: 0 136 255; /* #0088FF */
+    --info-soft: 204 231 255; /* #CCE7FF */
+    --violet: 97 85 245; /* #6155F5 Indigo */
+    --violet-soft: 223 221 253; /* #DFDDFD */
+    --cyan: 0 192 232; /* #00C0E8 */
+    --cyan-soft: 220 247 252; /* #DCF7FC */
+    --gold: 255 200 0; /* #FFC800 */
+    --chip: 101 145 230; /* #6591E6 position chip */
+
+    /* Stat strip gradients (Figma: 140°, soft tint → tone at ~38%) */
+    --strip-green-a: 234 249 241;
+    --strip-green-b: 155 194 173;
+    --strip-blue-a: 234 244 253;
+    --strip-blue-b: 146 203 254;
+    --strip-cyan-a: 243 254 255;
+    --strip-cyan-b: 151 232 237;
+    --strip-gold-a: 255 253 244;
+    --strip-gold-b: 255 233 152;
+    --strip-indigo-a: 223 221 253;
+    --strip-indigo-b: 176 170 250;
+    --strip-red-a: 255 234 234;
+    --strip-red-b: 255 167 168;
+
+    /* Shadow ink */
+    --shadow-ink: 6 32 15;
+  }
+
+  [data-theme='dark'] {
+    color-scheme: dark;
+
+    --surface-page: 13 17 15; /* #0D110F */
+    --surface-card: 22 27 25; /* #161B19 */
+    --surface-sunken: 29 35 32; /* #1D2320 */
+    --surface-muted: 36 43 40; /* #242B28 */
+    --surface-tint: 22 56 39; /* #163827 */
+
+    --line: 44 51 48; /* #2C3330 */
+    --line-strong: 64 73 69; /* #404945 */
+    --line-brand: 87 199 140; /* #57C78C */
+
+    --content-primary: 236 239 237; /* #ECEFED */
+    --content-secondary: 168 175 171; /* #A8AFAB */
+    --content-muted: 134 140 137; /* #868C89 */
+    --content-nav: 168 175 171; /* #A8AFAB */
+    --content-brand: 87 199 140; /* #57C78C */
+    --content-link: 92 172 255; /* #5CACFF */
+    --content-danger: 255 107 110; /* #FF6B6E */
+
+    --brand-300: 87 158 122; /* #579E7A */
+
+    --success: 74 222 112; /* #4ADE70 */
+    --success-soft: 14 52 27; /* #0E341B */
+    --warning: 255 160 82; /* #FFA052 */
+    --warning-soft: 60 36 14; /* #3C240E */
+    --danger: 255 107 110; /* #FF6B6E */
+    --danger-soft: 66 22 24; /* #421618 */
+    --info: 92 172 255; /* #5CACFF */
+    --info-soft: 14 40 66; /* #0E2842 */
+    --violet: 153 145 250; /* #9991FA */
+    --violet-soft: 36 33 74; /* #24214A */
+    --cyan: 70 214 244; /* #46D6F4 */
+    --cyan-soft: 10 48 58; /* #0A303A */
+
+    --strip-green-a: 22 40 31;
+    --strip-green-b: 31 84 57;
+    --strip-blue-a: 20 33 48;
+    --strip-blue-b: 22 68 112;
+    --strip-cyan-a: 18 40 44;
+    --strip-cyan-b: 16 86 98;
+    --strip-gold-a: 44 38 18;
+    --strip-gold-b: 92 74 14;
+    --strip-indigo-a: 32 30 58;
+    --strip-indigo-b: 62 56 128;
+    --strip-red-a: 48 24 26;
+    --strip-red-b: 110 38 42;
+
+    --shadow-ink: 0 0 0;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-page font-sans text-content-primary antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+
+  /* Links are neutral by default; colour them with utilities (e.g. `text-content-link`)
+     so a base `a:hover` rule never outranks component classes. */
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  select,
+  input,
+  button,
+  textarea {
+    font-family: inherit;
+  }
+
+  /* Bangla glyphs sit taller than Latin ones; give lines a little more room. */
+  :lang(bn) body {
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  /* Stat strip header gradients (`StatStrip` tones). */
+  .strip-green {
+    background-image: linear-gradient(140deg, rgb(var(--strip-green-a)), rgb(var(--strip-green-b)));
+  }
+  .strip-blue {
+    background-image: linear-gradient(140deg, rgb(var(--strip-blue-a)), rgb(var(--strip-blue-b)));
+  }
+  .strip-cyan {
+    background-image: linear-gradient(140deg, rgb(var(--strip-cyan-a)), rgb(var(--strip-cyan-b)));
+  }
+  .strip-gold {
+    background-image: linear-gradient(140deg, rgb(var(--strip-gold-a)), rgb(var(--strip-gold-b)));
+  }
+  .strip-indigo {
+    background-image: linear-gradient(
+      140deg,
+      rgb(var(--strip-indigo-a)),
+      rgb(var(--strip-indigo-b))
+    );
+  }
+  .strip-red {
+    background-image: linear-gradient(140deg, rgb(var(--strip-red-a)), rgb(var(--strip-red-b)));
+  }
+}
+
+@layer components {
+  /* Sign-in photo overlay (Figma "Login" frame, 40.7° dark-green → transparent). */
+  .auth-photo-overlay {
+    background-image: linear-gradient(
+      40.7deg,
+      rgb(0 23 2 / 0.62) 28.7%,
+      rgb(14 3 112 / 0.2) 56.6%,
+      rgb(0 0 0 / 0) 114%
+    );
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}
