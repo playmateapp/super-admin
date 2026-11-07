@@ -15,10 +15,10 @@ enforced in Postgres:
   `admin_user`, `admin_set_user_blocked`, `admin_teams`, `admin_team`, `admin_set_team_blocked`,
   `admin_matches`, `admin_match`, `admin_cancel_match`, `admin_venues`, `admin_venue`,
   `admin_save_venue`, `admin_set_venue_status`, `admin_subscriptions`, `admin_subscription`,
-  `admin_activity`, `admin_mark_activity_seen`, `admin_areas`, `admin_save_area`,
+  `admin_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_areas`, `admin_save_area`,
   `admin_delete_area`; `admin_phone_exists` (anon, forgot password).
 - SQL source: `Team-Mate-App/supabase/migrations/20261103000014_admin_core.sql`,
-  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`.
+  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`.
 
 ### How admin actions reach the app
 
@@ -42,7 +42,8 @@ subscription blocked / active / expired.
 | --- | --- | --- |
 | root | `app/layout.tsx` (fonts, `Providers`) | `/` → redirect `/dashboard` |
 | `(auth)` | `<AuthShell>` (stadium photo + form card) | `/login`, `/forgot-password` |
-| `(panel)` | `<AuthGuard><AdminShell topbarEnd={<NotificationBell/><AccountMenu/>} sidebarFooter={<LogoutButton/>}>` | `/dashboard`, `/users`, `/teams`, `/matches`, `/venues`, `/areas`, `/subscriptions`, `/notifications`, `/settings` |
+| `(public)` | none (root layout only, no guard) | `/privacy-policy` |
+| `(panel)` | `<AuthGuard><AdminShell topbarEnd={<NotificationBell/><AccountMenu/>} sidebarFooter={<LogoutButton/>}>` | `/dashboard`, `/users`, `/appeals`, `/teams`, `/matches`, `/venues`, `/areas`, `/subscriptions`, `/notifications`, `/settings` |
 
 Every `page.tsx` renders one screen from a feature barrel and sets `metadata.title`.
 
@@ -51,11 +52,13 @@ Every `page.tsx` renders one screen from a feature barrel and sets `metadata.tit
 | Feature | Owns |
 | --- | --- |
 | `auth` | login, forgot-password (SMS code), settings (change password), `AccountMenu`, `LogoutButton`, session store, `useProfile` (`admin_me`) |
+| `legal` | public privacy policy screen and its EN + BN copy |
 | `dashboard` | overview screen + SVG charts (donut, bars, area) |
 | `users` | list, detail panel, block dialog |
 | `teams` | list, detail panel, block dialog |
 | `matches` | list (+ date range, location), detail panel with countdown + squads, cancel dialog |
 | `venues` | list, detail panel, add / edit modal with uploads to storage `venue-photos` |
+| `appeals` | unblock requests from blocked players: status tabs, approve, reject with a reason |
 | `areas` | area list (`public.areas`) with venue / player counts, add / edit / delete modal |
 | `subscriptions` | list, detail panel (read-only) |
 | `notifications` | activity feed screen + `NotificationBell` |

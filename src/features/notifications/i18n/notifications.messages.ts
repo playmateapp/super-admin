@@ -22,6 +22,10 @@ const en = {
       title: 'New User Registered',
       body: 'A new user, {name}, has registered on PlayMate.',
     },
+    block_appeal: {
+      title: 'Unblock Request',
+      body: '{name} asked to get their account unblocked.',
+    },
     team_created: {
       title: 'New Team Created',
       body: '{owner} created a new team, {team}.',
@@ -90,6 +94,10 @@ const bn: typeof en = {
     user_registered: {
       title: 'নতুন ইউজার নিবন্ধিত',
       body: 'নতুন ইউজার {name} প্লেমেটে নিবন্ধন করেছেন।',
+    },
+    block_appeal: {
+      title: 'আনব্লক অনুরোধ',
+      body: '{name} তার অ্যাকাউন্ট আনব্লক করার অনুরোধ করেছেন।',
     },
     team_created: {
       title: 'নতুন টিম তৈরি',

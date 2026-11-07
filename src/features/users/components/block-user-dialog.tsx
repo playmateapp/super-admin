@@ -18,7 +18,7 @@ export interface BlockTarget {
 }
 
 /**
- * Runs the Block User toggle. Blocking asks first (it signs the player out of the app);
+ * Runs the Block User toggle. Blocking asks first (the player can then only view the app);
  * unblocking happens straight away. Both end with a toast.
  */
 export function useBlockUser() {

@@ -23,7 +23,7 @@ const en = {
     unblocked: '{name} can use PlayMate again',
     confirmTitle: 'Block User?',
     confirmMessage:
-      '{name} will be signed out of the PlayMate app and won’t be able to log in until you unblock them.',
+      '{name} will be notified and can only view the PlayMate app until you unblock them. They can ask for a review.',
     confirm: 'Block',
     cancel: 'Cancel',
   },
@@ -77,7 +77,7 @@ const bn: typeof en = {
     unblocked: '{name} আবার প্লেমেট ব্যবহার করতে পারবেন',
     confirmTitle: 'ইউজার ব্লক করবেন?',
     confirmMessage:
-      '{name} প্লেমেট অ্যাপ থেকে সাইন আউট হবেন এবং আনব্লক না করা পর্যন্ত লগইন করতে পারবেন না।',
+      '{name} নোটিফিকেশন পাবেন এবং আনব্লক না করা পর্যন্ত শুধু অ্যাপ দেখতে পারবেন। তিনি রিভিউয়ের অনুরোধ করতে পারবেন।',
     confirm: 'ব্লক করুন',
     cancel: 'বাতিল',
   },

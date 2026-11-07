@@ -72,3 +72,20 @@ subscription. The app shows a "Limited-time offer" card instead of the payment m
 panel keeps Subscriptions visible and labels these as "Free offer" (detail, recent payments,
 activity feed). Ending the offer = connect the gateway, then set the flag to `false`.
 (Migration 016, a short-lived "skip subscriptions entirely" switch, was superseded by 017.)
+
+## D-012 — Blocked players stay signed in, read-only (2026-11-06)
+The auth ban (+ deleting sessions) signed players out with no way to learn why or appeal, and did
+not actually stop them: an access token stays valid after its session is deleted, so a blocked
+player could keep creating teams for up to an hour. `profiles.blocked_at` is now the only switch.
+Trigger `guard_blocked_actor` rejects writes on every player table, so it holds for any client and
+takes effect instantly. Blocked players stay hidden from others, get a notification and push, and
+appeal from the app. Approving unblocks; rejecting needs a reason, which the player sees and may
+appeal again. Unblocking from Users also closes an open request.
+
+## D-013 — Privacy policy lives in the panel, as a public route (2026-11-07)
+Play Console needs a public privacy policy URL and the panel is the only web app PlayMate has, so
+`/privacy-policy` sits in a `(public)` group outside `AuthGuard`. Root metadata is noindex, so the
+page sets `robots` itself. Copy was written from the app's schema and permissions, so it must change
+when the data does. It only says the phone number is "not shown on your player profile" because
+`profiles` RLS (`using (true)`) still lets any signed-in user read phone and date of birth by API.
+Account deletion is by email until the app has an in-app option; 30 days is the stated limit.

@@ -5,6 +5,7 @@ import {
   Map as MapIcon,
   MapPin,
   Settings,
+  ShieldAlert,
   User,
   Users,
   type LucideIcon,
@@ -33,6 +34,7 @@ export interface AdminNavLink {
 export const adminNav: AdminNavLink[] = [
   { key: 'dashboard', labelKey: 'dashboard', icon: House, href: '/dashboard' },
   { key: 'users', labelKey: 'users', crumbKey: 'allUsers', icon: User, href: '/users' },
+  { key: 'appeals', labelKey: 'appeals', icon: ShieldAlert, href: '/appeals' },
   { key: 'teams', labelKey: 'teams', icon: Users, href: '/teams' },
   { key: 'matches', labelKey: 'matches', icon: CalendarDays, href: '/matches' },
   { key: 'venues', labelKey: 'venues', icon: MapPin, href: '/venues' },

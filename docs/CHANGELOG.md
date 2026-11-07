@@ -2,6 +2,28 @@
 
 Newest first. One entry per task: date, task, then Added / Changed / Fixed / Notes.
 
+## 2026-11-07 — Public privacy policy
+
+**Added**
+- `/privacy-policy` (feature `legal`, route group `(public)`): the PlayMate app's privacy policy in
+  EN + BN, open with no sign-in and indexable, for the Play Console privacy policy URL.
+
+**Notes**
+- Contact: `support.playmate@gmail.com`. Keep the copy in step with what the app collects (D-013).
+
+## 2026-11-06 — Unblock requests (Appeals)
+
+**Added**
+- `/appeals` (feature `appeals`): list of unblock requests with status tabs, approve, reject with
+  a required reason. Sidebar entry and a `block_appeal` item in the activity feed / bell.
+
+**Changed**
+- Blocking no longer bans the auth user or signs them out: the player stays signed in, read-only,
+  is notified and can appeal (D-012). Block dialog copy updated.
+
+**Notes**
+- Backend: app repo migration `20261106000019_block_appeals.sql`. The screen needs it applied.
+
 ## 2026-11-03 — Areas module
 
 **Added**

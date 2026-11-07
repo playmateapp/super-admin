@@ -13,6 +13,7 @@ Scope of this repo: the PlayMate **Super Admin** panel (Figma page "dart me", ad
 | 2 | Auth | Forgot password → SMS code → reset → success | 18483:1490–2414 | `/forgot-password` | ✅ 2026-11-03 |
 | 3 | Dashboard | Totals, subscription donut, revenue, user growth, recents | 18483:1081 | `/dashboard` | ✅ 2026-11-03 |
 | 4 | Users | List + filters, detail (overview / stats / photos / about), block | 18483:3014–5381 | `/users` | ✅ 2026-11-03 |
+| 4b | Appeals | Unblock requests: filter, approve, reject with reason | no design | `/appeals` | ✅ 2026-11-06 |
 | 5 | Teams | List + filters, detail (overview / players / matches / about), block | 18483:5714–7487 | `/teams` | ✅ 2026-11-03 |
 | 6 | Matches | List + 4 filters, detail (details / players), countdown, admin cancel | 18483:7849–9551 | `/matches` | ✅ 2026-11-03 |
 | 7 | Venues | List + filters, detail (details / photos), add / edit modal, inactive | 18483:9939–10702 | `/venues` | ✅ 2026-11-03 |
@@ -24,6 +25,11 @@ Scope of this repo: the PlayMate **Super Admin** panel (Figma page "dart me", ad
 
 ## Open TODOs
 
+- [ ] Privacy policy: deploy the panel and put the public `/privacy-policy` URL in Play Console and
+      the app's "Terms & Privacy" row. Update the "Deleting your account" section once the app has
+      in-app account deletion.
+- [ ] `profiles` RLS lets any signed-in user read every phone number and date of birth through the
+      API. The policy only says the phone is not shown on the profile; close this gap (D-013).
 - [ ] Re-initialise git (`git init`) — the folder is still not a repository.
 - [ ] SMS reset codes go through the app's Twilio **trial** account: they only reach verified
       numbers until Twilio is upgraded (the default admin's +61 number may not receive codes).

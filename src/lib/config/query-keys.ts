@@ -20,6 +20,10 @@ export const queryKeys = {
     list: (params: object = {}) => ['users', 'list', params] as const,
     detail: (id: string) => ['users', 'detail', id] as const,
   },
+  appeals: {
+    all: () => ['appeals'] as const,
+    list: (params: object = {}) => ['appeals', 'list', params] as const,
+  },
   teams: {
     all: () => ['teams'] as const,
     list: (params: object = {}) => ['teams', 'list', params] as const,

@@ -17,6 +17,6 @@ export const getUsers = (p: UsersParams) =>
 /** rpc admin_user — one player with stats, photos and recent matches. */
 export const getUser = (id: string) => rpc<UserDetail>('admin_user', { p_id: id });
 
-/** rpc admin_set_user_blocked — blocks (auth ban + sign-out) or restores a player. */
+/** rpc admin_set_user_blocked — blocks (read-only + notified, can appeal) or restores a player. */
 export const setUserBlocked = (id: string, blocked: boolean) =>
   rpc<void>('admin_set_user_blocked', { p_user: id, p_blocked: blocked });
