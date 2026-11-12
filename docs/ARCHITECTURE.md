@@ -18,7 +18,7 @@ enforced in Postgres:
   `admin_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_team_block_appeals`, `admin_review_team_block_appeal`, `admin_areas`, `admin_save_area`,
   `admin_delete_area`; `admin_phone_exists` (anon, forgot password).
 - SQL source: `Team-Mate-App/supabase/migrations/20261103000014_admin_core.sql`,
-  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`, `…023_team_block_appeals.sql`.
+  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`, `…023_team_block_appeals.sql`, `…025_admin_team_appeal_flags.sql`.
 
 ### How admin actions reach the app
 

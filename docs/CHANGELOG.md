@@ -2,6 +2,23 @@
 
 Newest first. One entry per task: date, task, then Added / Changed / Fixed / Notes.
 
+## 2026-11-12 — Team unblock requests on the Teams screen
+
+**Added**
+- Teams list: "Appeal requested" pill under the status of a team whose owner is waiting for a
+  review, an "Unblock requests" counter in the header strip and an "Appeal requested" status
+  filter. Teams with an open request sort first.
+- Team detail panel: "Unblock request" card (sender, date, message, status, rejection reason)
+  with Approve / Reject in place and a link to all team requests.
+- Appeals → Teams rows: "View team" opens `/teams?team=<id>` with that team selected;
+  `/appeals?kind=team` opens the Teams tab.
+
+**Notes**
+- Backend: app repo migration `20261112000025_admin_team_appeal_flags.sql` (`admin_teams` adds
+  `appeal_pending`, `stats.appeals`, `p_status = 'appeal'`; `admin_team` adds `appeal`). Until it
+  is applied the badge, counter and card stay hidden (fields are optional).
+- The Teams feature imports the review dialogs from the `@/features/appeals` barrel (D-015).
+
 ## 2026-11-12 — Team unblock requests
 
 **Added**

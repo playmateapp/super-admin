@@ -14,6 +14,7 @@ import type {
 const fromUser = (r: UserAppealRow): Appeal => ({
   id: r.id,
   kind: 'user',
+  ref_id: r.user_id,
   message: r.message,
   status: r.status,
   admin_reason: r.admin_reason,
@@ -28,6 +29,7 @@ const fromUser = (r: UserAppealRow): Appeal => ({
 const fromTeam = (r: TeamAppealRow): Appeal => ({
   id: r.id,
   kind: 'team',
+  ref_id: r.team_id,
   message: r.message,
   status: r.status,
   admin_reason: r.admin_reason,

@@ -16,6 +16,7 @@ const en = {
     message: 'Request',
     date: 'Sent',
     status: 'Status',
+    rowView: 'View team {name}',
     rowApprove: 'Approve {name}',
     rowReject: 'Reject {name}',
   },
@@ -23,6 +24,7 @@ const en = {
   tabs: { all: 'All', pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
   status: { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
   actions: {
+    viewTeam: 'View team',
     approve: 'Approve',
     reject: 'Reject',
     cancel: 'Cancel',
@@ -57,6 +59,7 @@ const bn: typeof en = {
     message: 'অনুরোধ',
     date: 'পাঠানো হয়েছে',
     status: 'স্ট্যাটাস',
+    rowView: 'টিম {name} দেখুন',
     rowApprove: '{name} অনুমোদন করুন',
     rowReject: '{name} বাতিল করুন',
   },
@@ -64,6 +67,7 @@ const bn: typeof en = {
   tabs: { all: 'সব', pending: 'অপেক্ষমাণ', approved: 'অনুমোদিত', rejected: 'বাতিল' },
   status: { pending: 'অপেক্ষমাণ', approved: 'অনুমোদিত', rejected: 'বাতিল' },
   actions: {
+    viewTeam: 'টিম দেখুন',
     approve: 'অনুমোদন',
     reject: 'বাতিল করুন',
     cancel: 'ফিরে যান',

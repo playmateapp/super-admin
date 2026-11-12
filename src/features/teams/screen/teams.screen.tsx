@@ -1,7 +1,7 @@
 'use client';
 
-import { Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { MailQuestionMark, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   ActionMenu,
@@ -18,6 +18,7 @@ import {
   SearchBox,
   SplitLayout,
   StatStrip,
+  StatusPill,
   StatusTag,
   type ListColumn,
 } from '@/components/ui';
@@ -45,6 +46,13 @@ export function TeamsScreen() {
   const list = useListState({ format: '', status: '' });
   const [confirmBlock, setConfirmBlock] = useState<BlockTarget | null>(null);
   const unblock = useBlockTeam();
+  const { setSelectedId } = list;
+
+  // `/teams?team=<id>` (View team on an unblock request) opens that team's panel.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('team');
+    if (id) setSelectedId(id);
+  }, [setSelectedId]);
 
   const params = useMemo(
     () => ({
@@ -96,8 +104,15 @@ export function TeamsScreen() {
       {
         key: 'status',
         header: m.list.status,
-        className: 'w-[110px] text-center',
-        cell: (t) => <StatusTag status={t.status} className="w-full" />,
+        className: 'w-[130px] text-center',
+        cell: (t) => (
+          <div className="flex flex-col items-center gap-1">
+            <StatusTag status={t.status} className="w-full" />
+            {t.appeal_pending ? (
+              <StatusPill tone="warning" label={m.list.appealBadge} className="w-full" />
+            ) : null}
+          </div>
+        ),
       },
     ],
     [m, c],
@@ -128,6 +143,13 @@ export function TeamsScreen() {
             icon: <Users className="text-danger" strokeWidth={1.75} />,
             value: data ? formatCount(data.stats.blocked) : '—',
           },
+          {
+            key: 'appeals',
+            label: m.stats.appeals,
+            tone: 'gold',
+            icon: <MailQuestionMark className="text-warning" strokeWidth={1.75} />,
+            value: data ? formatCount(data.stats.appeals ?? 0) : '—',
+          },
         ]}
       />
 
@@ -156,10 +178,13 @@ export function TeamsScreen() {
                   onChange={(v) => list.setFilter('status', v)}
                   placeholder={m.list.statusFilter}
                   allLabel={m.list.allStatuses}
-                  options={(['active', 'inactive', 'blocked'] as const).map((s) => ({
-                    value: s,
-                    label: c.status[s],
-                  }))}
+                  options={[
+                    ...(['active', 'inactive', 'blocked'] as const).map((s) => ({
+                      value: s,
+                      label: c.status[s],
+                    })),
+                    { value: 'appeal', label: m.list.appealFilter },
+                  ]}
                 />
               </div>
             </div>

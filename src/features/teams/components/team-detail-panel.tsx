@@ -37,6 +37,7 @@ import { useMessages } from '@/providers/i18n-provider';
 import { useTeam } from '../hooks/queries';
 import { teamsMessages } from '../i18n/teams.messages';
 import type { BlockTarget } from './block-team-dialog';
+import { TeamAppealCard } from './team-appeal-card';
 
 type Tab = 'overview' | 'players' | 'matches' | 'about';
 
@@ -100,6 +101,8 @@ export function TeamDetailPanel({
           </ActionMenu>
         }
       />
+
+      {team.appeal ? <TeamAppealCard team={team} /> : null}
 
       <div className="flex gap-2 rounded-[10px] bg-surface-muted p-2.5">
         <RecordCell

@@ -1,7 +1,8 @@
 'use client';
 
-import { Check, Clock, ShieldX, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Check, Clock, Eye, ShieldX, X } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -43,6 +44,11 @@ export function AppealsScreen() {
   const [kind, setKind] = useState<AppealKind>('user');
   const [status, setStatus] = useState<AppealStatus | 'all'>('pending');
   const [page, setPage] = useState(1);
+
+  // `/appeals?kind=team` (links from the Teams screen) opens the Teams tab.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('kind') === 'team') setKind('team');
+  }, []);
   const [approving, setApproving] = useState<Appeal | null>(null);
   const [rejecting, setRejecting] = useState<Appeal | null>(null);
   const { data, isLoading, isError, refetch } = useAppealList({
@@ -184,29 +190,42 @@ export function AppealsScreen() {
           isError={isError}
           onRetry={refetch}
           minWidth={820}
-          actions={(a) =>
-            a.status === 'pending' ? (
-              <div className="flex justify-center gap-2">
-                <Button
-                  size="sm"
-                  aria-label={interpolate(m.list.rowApprove, { name: a.name })}
-                  onClick={() => setApproving(a)}
-                >
-                  <Check />
-                  {m.actions.approve}
+          actions={(a) => (
+            <div className="flex justify-center gap-2">
+              {a.kind === 'team' ? (
+                <Button size="sm" variant="outline" asChild>
+                  <Link
+                    href={`/teams?team=${a.ref_id}`}
+                    aria-label={interpolate(m.list.rowView, { name: a.name })}
+                  >
+                    <Eye />
+                    {m.actions.viewTeam}
+                  </Link>
                 </Button>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  aria-label={interpolate(m.list.rowReject, { name: a.name })}
-                  onClick={() => setRejecting(a)}
-                >
-                  <X />
-                  {m.actions.reject}
-                </Button>
-              </div>
-            ) : null
-          }
+              ) : null}
+              {a.status === 'pending' ? (
+                <>
+                  <Button
+                    size="sm"
+                    aria-label={interpolate(m.list.rowApprove, { name: a.name })}
+                    onClick={() => setApproving(a)}
+                  >
+                    <Check />
+                    {m.actions.approve}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    aria-label={interpolate(m.list.rowReject, { name: a.name })}
+                    onClick={() => setRejecting(a)}
+                  >
+                    <X />
+                    {m.actions.reject}
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          )}
         />
         {data ? (
           <Pager page={page} pageSize={PAGE_SIZE} total={data.total} onChange={setPage} />

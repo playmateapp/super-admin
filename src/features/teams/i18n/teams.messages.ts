@@ -2,7 +2,12 @@ import { defineMessages } from '@/lib/i18n';
 
 /** Copy of the Teams screen (Figma "Teams" frames). */
 const en = {
-  stats: { total: 'Total Teams', active: 'Active', blocked: 'Suspend team' },
+  stats: {
+    total: 'Total Teams',
+    active: 'Active',
+    blocked: 'Suspend team',
+    appeals: 'Unblock requests',
+  },
   list: {
     title: 'All Teams',
     search: 'Search Teams by name and Id',
@@ -10,6 +15,8 @@ const en = {
     allFormats: 'All Format',
     statusFilter: 'Status',
     allStatuses: 'All Status',
+    appealFilter: 'Appeal requested',
+    appealBadge: 'Appeal requested',
     name: 'Name',
     format: 'Format',
     owner: 'Team Owner',
@@ -53,11 +60,20 @@ const en = {
     noAbout: 'No description yet.',
     roleOwner: 'Owner',
     roleCaptain: 'Captain',
+    appeal: {
+      title: 'Unblock request',
+      from: 'From {name} · {date}',
+      reason: 'Your reason',
+      status: { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
+      approve: 'Approve',
+      reject: 'Reject',
+      all: 'All requests',
+    },
   },
 };
 
 const bn: typeof en = {
-  stats: { total: 'মোট টিম', active: 'সক্রিয়', blocked: 'স্থগিত টিম' },
+  stats: { total: 'মোট টিম', active: 'সক্রিয়', blocked: 'স্থগিত টিম', appeals: 'আনব্লক অনুরোধ' },
   list: {
     title: 'সব টিম',
     search: 'নাম বা আইডি দিয়ে টিম খুঁজুন',
@@ -65,6 +81,8 @@ const bn: typeof en = {
     allFormats: 'সব ফরম্যাট',
     statusFilter: 'স্ট্যাটাস',
     allStatuses: 'সব স্ট্যাটাস',
+    appealFilter: 'আপিল করা হয়েছে',
+    appealBadge: 'আপিল করা হয়েছে',
     name: 'নাম',
     format: 'ফরম্যাট',
     owner: 'টিম মালিক',
@@ -108,6 +126,15 @@ const bn: typeof en = {
     noAbout: 'এখনও কোনো বর্ণনা নেই।',
     roleOwner: 'মালিক',
     roleCaptain: 'অধিনায়ক',
+    appeal: {
+      title: 'আনব্লক অনুরোধ',
+      from: '{name} পাঠিয়েছেন · {date}',
+      reason: 'আপনার দেওয়া কারণ',
+      status: { pending: 'অপেক্ষমাণ', approved: 'অনুমোদিত', rejected: 'বাতিল' },
+      approve: 'অনুমোদন',
+      reject: 'বাতিল করুন',
+      all: 'সব অনুরোধ',
+    },
   },
 };
 

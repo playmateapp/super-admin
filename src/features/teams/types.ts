@@ -25,6 +25,8 @@ export interface TeamRow {
   created_at: string;
   status: TeamStatus;
   owner: PersonRef;
+  /** The owner asked for the block to be reviewed and no admin has answered yet. */
+  appeal_pending?: boolean;
 }
 
 export interface TeamsParams {
@@ -37,7 +39,7 @@ export interface TeamsParams {
 
 export interface TeamsResponse {
   total: number;
-  stats: { total: number; active: number; blocked: number };
+  stats: { total: number; active: number; blocked: number; appeals?: number };
   rows: TeamRow[];
 }
 
@@ -61,6 +63,17 @@ export interface TeamMatch {
   away: TeamRef;
 }
 
+/** Latest unblock request for the team's current block (`team_block_appeals`). */
+export interface TeamAppeal {
+  id: string;
+  message: string;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_reason: string;
+  created_at: string;
+  reviewed_at: string | null;
+  sender: PersonRef | null;
+}
+
 export interface TeamDetail {
   id: string;
   team_code: string;
@@ -80,6 +93,7 @@ export interface TeamDetail {
   player_count: number;
   record: { played: number; won: number; drawn: number; lost: number };
   subscription_ends_at: string | null;
+  appeal?: TeamAppeal | null;
   players: TeamPlayer[];
   recent_matches: TeamMatch[];
 }

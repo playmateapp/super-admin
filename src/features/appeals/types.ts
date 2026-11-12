@@ -46,6 +46,8 @@ export interface TeamAppealRow {
 export interface Appeal {
   id: string;
   kind: AppealKind;
+  /** The blocked player's id, or the blocked team's id. */
+  ref_id: string;
   message: string;
   status: AppealStatus;
   admin_reason: string;

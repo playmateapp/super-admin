@@ -97,3 +97,10 @@ a request (one open at a time, like player appeals). Requests live in their own 
 `/appeals` rather than a new page, since the review flow is identical. The API maps both RPCs into
 one `Appeal` row so the table and dialogs stay shared.
 
+## D-015 — Teams reuses the Appeals review dialogs through the barrel (2026-11-12)
+The admin asked to see and answer a team's unblock request from the team itself. Rather than copy
+the approve / reject dialogs and mutation into `teams`, the `appeals` barrel exports
+`ApproveAppealDialog` / `RejectAppealDialog` and the Teams detail panel maps `admin_team().appeal`
+into an `Appeal`. One review flow, one cache invalidation; a narrow, documented exception to the
+"barrel imports only for session concerns" rule.
+
