@@ -6,14 +6,20 @@ const en = {
   list: {
     title: 'Unblock Requests',
     hint: 'Blocked players ask here to get their account back. They are told your decision in the app.',
+    teamHint:
+      'Owners of blocked teams ask here to get their team back. The owner is told your decision in the app.',
     tabsLabel: 'Filter requests by status',
+    kindLabel: 'Show requests for',
     player: 'Player',
+    team: 'Team',
+    owner: 'Owner',
     message: 'Request',
     date: 'Sent',
     status: 'Status',
     rowApprove: 'Approve {name}',
     rowReject: 'Reject {name}',
   },
+  kinds: { user: 'Players', team: 'Teams' },
   tabs: { all: 'All', pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
   status: { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' },
   actions: {
@@ -29,6 +35,10 @@ const en = {
     reasonPlaceholder: 'Why is this request being rejected?',
     reasonRequired: 'Please give a reason',
     rejected: 'Request from {name} rejected',
+    approveTeamTitle: 'Unblock this team?',
+    approveTeamMessage:
+      '{name} is visible again and can challenge and play right away. Its owner and captains are notified.',
+    rejectTeamMessage: '{name} stays blocked. The owner sees your reason in the app.',
   },
 };
 
@@ -37,14 +47,20 @@ const bn: typeof en = {
   list: {
     title: 'আনব্লক অনুরোধ',
     hint: 'ব্লক হওয়া প্লেয়াররা এখানে অ্যাকাউন্ট ফিরে পেতে অনুরোধ করেন। আপনার সিদ্ধান্ত তাদের অ্যাপে জানানো হয়।',
+    teamHint:
+      'ব্লক হওয়া টিমের মালিকরা এখানে টিম ফিরে পেতে অনুরোধ করেন। আপনার সিদ্ধান্ত মালিককে অ্যাপে জানানো হয়।',
     tabsLabel: 'স্ট্যাটাস অনুযায়ী অনুরোধ ফিল্টার করুন',
+    kindLabel: 'যাদের অনুরোধ দেখাবে',
     player: 'প্লেয়ার',
+    team: 'টিম',
+    owner: 'মালিক',
     message: 'অনুরোধ',
     date: 'পাঠানো হয়েছে',
     status: 'স্ট্যাটাস',
     rowApprove: '{name} অনুমোদন করুন',
     rowReject: '{name} বাতিল করুন',
   },
+  kinds: { user: 'প্লেয়ার', team: 'টিম' },
   tabs: { all: 'সব', pending: 'অপেক্ষমাণ', approved: 'অনুমোদিত', rejected: 'বাতিল' },
   status: { pending: 'অপেক্ষমাণ', approved: 'অনুমোদিত', rejected: 'বাতিল' },
   actions: {
@@ -60,6 +76,10 @@ const bn: typeof en = {
     reasonPlaceholder: 'এই অনুরোধ কেন বাতিল করা হচ্ছে?',
     reasonRequired: 'অনুগ্রহ করে একটি কারণ লিখুন',
     rejected: '{name}-এর অনুরোধ বাতিল হয়েছে',
+    approveTeamTitle: 'এই টিম আনব্লক করবেন?',
+    approveTeamMessage:
+      '{name} আবার দেখা যাবে এবং সঙ্গে সঙ্গে চ্যালেঞ্জ ও ম্যাচ খেলতে পারবে। মালিক ও ক্যাপ্টেনরা নোটিফিকেশন পাবেন।',
+    rejectTeamMessage: '{name} ব্লকই থাকবে। মালিক অ্যাপে আপনার দেওয়া কারণ দেখতে পাবেন।',
   },
 };
 

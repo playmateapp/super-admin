@@ -15,10 +15,10 @@ enforced in Postgres:
   `admin_user`, `admin_set_user_blocked`, `admin_teams`, `admin_team`, `admin_set_team_blocked`,
   `admin_matches`, `admin_match`, `admin_cancel_match`, `admin_venues`, `admin_venue`,
   `admin_save_venue`, `admin_set_venue_status`, `admin_subscriptions`, `admin_subscription`,
-  `admin_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_areas`, `admin_save_area`,
+  `admin_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_team_block_appeals`, `admin_review_team_block_appeal`, `admin_areas`, `admin_save_area`,
   `admin_delete_area`; `admin_phone_exists` (anon, forgot password).
 - SQL source: `Team-Mate-App/supabase/migrations/20261103000014_admin_core.sql`,
-  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`.
+  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`, `…023_team_block_appeals.sql`.
 
 ### How admin actions reach the app
 
@@ -58,7 +58,7 @@ Every `page.tsx` renders one screen from a feature barrel and sets `metadata.tit
 | `teams` | list, detail panel, block dialog |
 | `matches` | list (+ date range, location), detail panel with countdown + squads, cancel dialog |
 | `venues` | list, detail panel, add / edit modal with uploads to storage `venue-photos` |
-| `appeals` | unblock requests from blocked players: status tabs, approve, reject with a reason |
+| `appeals` | unblock requests from blocked players and team owners: Players / Teams switch, status tabs, approve, reject with a reason |
 | `areas` | area list (`public.areas`) with venue / player counts, add / edit / delete modal |
 | `subscriptions` | list, detail panel (read-only) |
 | `notifications` | activity feed screen + `NotificationBell` |

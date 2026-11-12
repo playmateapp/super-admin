@@ -7,6 +7,7 @@
 export type ActivityKind =
   | 'user_registered'
   | 'block_appeal'
+  | 'team_block_appeal'
   | 'team_created'
   | 'subscription_activated'
   | 'subscription_expiring'

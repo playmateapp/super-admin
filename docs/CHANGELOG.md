@@ -2,6 +2,24 @@
 
 Newest first. One entry per task: date, task, then Added / Changed / Fixed / Notes.
 
+## 2026-11-12 — Team unblock requests
+
+**Added**
+- `/appeals` now has a Players / Teams switch. Teams lists requests from owners of blocked
+  teams (team, owner, request, date, status) with the same Approve / Reject-with-reason flow.
+  Approving unblocks the team; rejecting sends the reason to the owner in the app.
+- `team_block_appeal` item in the activity feed / bell.
+
+**Changed**
+- Blocking / unblocking a user or a team also refreshes the appeals list (unblocking answers an
+  open request). Repeating a team's current block state no longer re-notifies.
+
+**Notes**
+- Backend: app repo migration `20261112000023_team_block_appeals.sql` (`team_block_appeals`,
+  `team_block_info`, `submit_team_block_appeal`, `admin_team_block_appeals`,
+  `admin_review_team_block_appeal`, updated `admin_set_team_blocked` + `admin_activity`).
+  The Teams tab needs it applied.
+
 ## 2026-11-07 — Public privacy policy
 
 **Added**

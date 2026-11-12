@@ -89,3 +89,11 @@ page sets `robots` itself. Copy was written from the app's schema and permission
 when the data does. It only says the phone number is "not shown on your player profile" because
 `profiles` RLS (`using (true)`) still lets any signed-in user read phone and date of birth by API.
 Account deletion is by email until the app has an in-app option; 30 days is the stated limit.
+
+## D-014 — Team unblock requests share the Appeals screen (2026-11-12)
+A blocked team's members see the block on the team page in the app, but only the owner can send
+a request (one open at a time, like player appeals). Requests live in their own table
+(`team_block_appeals`) and RPCs, and the panel shows them under a Players / Teams switch on
+`/appeals` rather than a new page, since the review flow is identical. The API maps both RPCs into
+one `Appeal` row so the table and dialogs stay shared.
+

@@ -26,9 +26,9 @@ export function ApproveAppealDialog({
   const confirm = () => {
     if (!appeal) return;
     review.mutate(
-      { id: appeal.id, approve: true },
+      { kind: appeal.kind, id: appeal.id, approve: true },
       {
-        onSuccess: () => toast.success(interpolate(m.approved, { name: appeal.full_name })),
+        onSuccess: () => toast.success(interpolate(m.approved, { name: appeal.name })),
         onError: (err) => toast.error(getErrorMessage(err, c.actionFailed)),
         onSettled: onClose,
       },
@@ -39,8 +39,10 @@ export function ApproveAppealDialog({
       open={!!appeal}
       onOpenChange={(open) => !open && onClose()}
       icon={<ShieldCheck />}
-      title={m.approveTitle}
-      message={interpolate(m.approveMessage, { name: appeal?.full_name ?? '' })}
+      title={appeal?.kind === 'team' ? m.approveTeamTitle : m.approveTitle}
+      message={interpolate(appeal?.kind === 'team' ? m.approveTeamMessage : m.approveMessage, {
+        name: appeal?.name ?? '',
+      })}
       cancelLabel={m.cancel}
       confirmLabel={m.approve}
       isPending={review.isPending}
@@ -49,7 +51,7 @@ export function ApproveAppealDialog({
   );
 }
 
-/** Rejecting needs a reason: it is what the player reads in the app. */
+/** Rejecting needs a reason: it is what the player / team owner reads in the app. */
 export function RejectAppealDialog({
   appeal,
   onClose,
@@ -77,10 +79,10 @@ export function RejectAppealDialog({
       return;
     }
     review.mutate(
-      { id: appeal.id, approve: false, reason: reason.trim() },
+      { kind: appeal.kind, id: appeal.id, approve: false, reason: reason.trim() },
       {
         onSuccess: () => {
-          toast.success(interpolate(m.rejected, { name: appeal.full_name }));
+          toast.success(interpolate(m.rejected, { name: appeal.name }));
           onClose();
         },
         onError: (err) => toast.error(getErrorMessage(err, c.actionFailed)),
@@ -93,7 +95,9 @@ export function RejectAppealDialog({
       open={!!appeal}
       onOpenChange={(open) => !open && onClose()}
       title={m.rejectTitle}
-      description={interpolate(m.rejectMessage, { name: appeal?.full_name ?? '' })}
+      description={interpolate(appeal?.kind === 'team' ? m.rejectTeamMessage : m.rejectMessage, {
+        name: appeal?.name ?? '',
+      })}
       submitLabel={m.reject}
       cancelLabel={m.cancel}
       tone="danger"

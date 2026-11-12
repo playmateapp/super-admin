@@ -14,6 +14,8 @@ export function useSetUserBlocked() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.users.all() });
       qc.invalidateQueries({ queryKey: queryKeys.dashboard.all() });
+      // Unblocking also answers an open unblock request.
+      qc.invalidateQueries({ queryKey: queryKeys.appeals.all() });
     },
   });
 }

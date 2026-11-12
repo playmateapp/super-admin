@@ -26,6 +26,10 @@ const en = {
       title: 'Unblock Request',
       body: '{name} asked to get their account unblocked.',
     },
+    team_block_appeal: {
+      title: 'Team Unblock Request',
+      body: '{name} asked to get their team, {team}, unblocked.',
+    },
     team_created: {
       title: 'New Team Created',
       body: '{owner} created a new team, {team}.',
@@ -98,6 +102,10 @@ const bn: typeof en = {
     block_appeal: {
       title: 'আনব্লক অনুরোধ',
       body: '{name} তার অ্যাকাউন্ট আনব্লক করার অনুরোধ করেছেন।',
+    },
+    team_block_appeal: {
+      title: 'টিম আনব্লক অনুরোধ',
+      body: '{name} তার টিম {team} আনব্লক করার অনুরোধ করেছেন।',
     },
     team_created: {
       title: 'নতুন টিম তৈরি',
