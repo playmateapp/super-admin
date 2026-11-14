@@ -1,7 +1,7 @@
 'use client';
 
 import { User } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   ActionMenu,
@@ -41,15 +41,25 @@ const PAGE_SIZE = 10;
 export function UsersScreen() {
   const m = useMessages(usersMessages);
   const c = useMessages(commonMessages);
-  const list = useListState({ type: '', status: '' });
+  const list = useListState({ type: '', status: '', gender: '', profileType: '', division: '' });
   const [confirmBlock, setConfirmBlock] = useState<BlockTarget | null>(null);
   const unblock = useBlockUser();
+  const { setSelectedId } = list;
+
+  // `/users?user=<id>` (owner / captain on a team panel) opens that player's panel.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('user');
+    if (id) setSelectedId(id);
+  }, [setSelectedId]);
 
   const params = useMemo(
     () => ({
       search: list.debouncedSearch,
       type: list.filters.type,
       status: list.filters.status,
+      gender: list.filters.gender,
+      profileType: list.filters.profileType,
+      division: list.filters.division,
       page: list.page,
       pageSize: PAGE_SIZE,
     }),
@@ -73,7 +83,12 @@ export function UsersScreen() {
           <IdentityCell
             avatar={<EntityAvatar src={u.avatar_url} name={u.full_name} />}
             name={u.full_name || c.none}
-            sub={interpolate(c.id, { id: u.player_code })}
+            sub={[
+              interpolate(c.id, { id: u.player_code }),
+              u.profile_type ? (m.profileTypes[u.profile_type] ?? u.profile_type) : '',
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           />
         ),
       },
@@ -100,6 +115,24 @@ export function UsersScreen() {
             <span className="flex items-center gap-1">
               <EntityAvatar src={u.team.logo_url} name={u.team.name} size={32} />
               <span className="line-clamp-2 font-display text-body-xs">{u.team.name}</span>
+            </span>
+          ) : (
+            <span className="ps-2.5">-</span>
+          ),
+      },
+      {
+        key: 'location',
+        header: m.list.location,
+        className: 'w-[140px]',
+        cell: (u) =>
+          u.thana || u.district || u.division ? (
+            <span className="flex min-w-0 flex-col gap-0.5 text-start">
+              <span className="line-clamp-1 text-body-xs text-content-primary">
+                {[u.thana, u.district].filter(Boolean).join(', ') || u.division}
+              </span>
+              <span className="line-clamp-1 text-caption text-content-secondary">
+                {[u.thana || u.district ? u.division : '', u.post_code].filter(Boolean).join(' · ')}
+              </span>
             </span>
           ) : (
             <span className="ps-2.5">-</span>
@@ -170,6 +203,38 @@ export function UsersScreen() {
                   }))}
                 />
               </div>
+            </div>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <FilterMenu
+                className="flex-1"
+                value={list.filters.gender}
+                onChange={(v) => list.setFilter('gender', v)}
+                placeholder={m.list.genderFilter}
+                allLabel={m.list.allGenders}
+                options={['Male', 'Female'].map((g) => ({ value: g, label: m.genders[g] ?? g }))}
+              />
+              <FilterMenu
+                className="flex-1"
+                value={list.filters.profileType}
+                onChange={(v) => list.setFilter('profileType', v)}
+                placeholder={m.list.profileTypeFilter}
+                allLabel={m.list.allProfileTypes}
+                options={(data?.options.profile_types ?? []).map((t) => ({
+                  value: t,
+                  label: m.profileTypes[t] ?? t,
+                }))}
+              />
+              <FilterMenu
+                className="flex-1"
+                value={list.filters.division}
+                onChange={(v) => list.setFilter('division', v)}
+                placeholder={m.list.divisionFilter}
+                allLabel={m.list.allDivisions}
+                options={(data?.options.divisions ?? []).map((d) => ({
+                  value: String(d.id),
+                  label: d.name,
+                }))}
+              />
             </div>
             <ListTable
               columns={columns}

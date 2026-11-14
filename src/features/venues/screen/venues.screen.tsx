@@ -21,7 +21,7 @@ import {
   StatusTag,
   type ListColumn,
 } from '@/components/ui';
-import { useAreas } from '@/lib/hooks/use-areas';
+import { useDistricts, useDivisions, useThanas } from '@/lib/hooks/use-locations';
 import { useListState } from '@/lib/hooks/use-list-state';
 import { commonMessages } from '@/lib/i18n';
 import { formatCount, getErrorMessage, interpolate } from '@/lib/utils';
@@ -37,14 +37,19 @@ import type { Venue } from '../types';
 const PAGE_SIZE = 9;
 
 /**
- * VenuesScreen — `/venues` (Figma "All Venues"): totals, the venue list with search + area +
- * status filters and "+ Add Venue", the detail panel and the Add / Edit modal.
+ * VenuesScreen — `/venues` (Figma "All Venues"): totals, the venue (= turf) list with search,
+ * Division / District / Thana + status filters and "+ Add Venue", the detail panel and the
+ * Add / Edit modal.
  */
 export function VenuesScreen() {
   const m = useMessages(venuesMessages);
   const c = useMessages(commonMessages);
-  const list = useListState({ area: '', status: '' });
-  const { data: areas } = useAreas();
+  const list = useListState({ division: '', district: '', thana: '', status: '' });
+  const { data: divisions } = useDivisions();
+  const { data: districts } = useDistricts(
+    list.filters.division ? Number(list.filters.division) : null,
+  );
+  const { data: thanas } = useThanas(list.filters.district ? Number(list.filters.district) : null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Venue | null>(null);
   const setStatus = useSetVenueStatus();
@@ -52,8 +57,10 @@ export function VenuesScreen() {
   const params = useMemo(
     () => ({
       search: list.debouncedSearch,
-      area: list.filters.area,
       status: list.filters.status,
+      divisionId: list.filters.division ? Number(list.filters.division) : null,
+      districtId: list.filters.district ? Number(list.filters.district) : null,
+      thanaId: list.filters.thana ? Number(list.filters.thana) : null,
       page: list.page,
       pageSize: PAGE_SIZE,
     }),
@@ -112,7 +119,7 @@ export function VenuesScreen() {
         header: m.list.location,
         cell: (v) => (
           <span className="line-clamp-2 font-display text-body-xs">
-            {[v.address, v.area].filter(Boolean).join(', ') || c.none}
+            {[v.thana, v.district].filter(Boolean).join(', ') || v.address || c.none}
           </span>
         ),
       },
@@ -158,23 +165,53 @@ export function VenuesScreen() {
         list={
           <Panel className="flex flex-col gap-4 p-4">
             <PanelTitle>{m.list.title}</PanelTitle>
-            <div className="flex flex-col gap-3 md:flex-row md:gap-4">
-              <SearchBox
-                value={list.search}
-                onChange={list.setSearch}
-                placeholder={m.list.search}
-              />
-              <div className="flex flex-wrap gap-3 md:flex-nowrap md:gap-4">
+            {/* Search + Add on top, the four filters on their own row (they don't fit beside it). */}
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3 md:gap-4">
+                <SearchBox
+                  value={list.search}
+                  onChange={list.setSearch}
+                  placeholder={m.list.search}
+                />
+                <Button className="h-[43px] shrink-0 rounded-input" onClick={() => openForm(null)}>
+                  <Plus />
+                  {m.list.add}
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <FilterMenu
-                  className="flex-1"
-                  value={list.filters.area}
-                  onChange={(v) => list.setFilter('area', v)}
-                  placeholder={m.list.areaFilter}
-                  allLabel={m.list.allAreas}
-                  options={(areas ?? []).map((a) => ({ value: a, label: a }))}
+                  className="w-full"
+                  value={list.filters.division}
+                  onChange={(v) => {
+                    list.setFilter('division', v);
+                    list.setFilter('district', '');
+                    list.setFilter('thana', '');
+                  }}
+                  placeholder={m.list.divisionFilter}
+                  allLabel={m.list.divisionFilter}
+                  options={(divisions ?? []).map((d) => ({ value: String(d.id), label: d.name }))}
                 />
                 <FilterMenu
-                  className="flex-1"
+                  className="w-full"
+                  value={list.filters.district}
+                  onChange={(v) => {
+                    list.setFilter('district', v);
+                    list.setFilter('thana', '');
+                  }}
+                  placeholder={m.list.districtFilter}
+                  allLabel={m.list.districtFilter}
+                  options={(districts ?? []).map((d) => ({ value: String(d.id), label: d.name }))}
+                />
+                <FilterMenu
+                  className="w-full"
+                  value={list.filters.thana}
+                  onChange={(v) => list.setFilter('thana', v)}
+                  placeholder={m.list.thanaFilter}
+                  allLabel={m.list.thanaFilter}
+                  options={(thanas ?? []).map((t) => ({ value: String(t.id), label: t.name }))}
+                />
+                <FilterMenu
+                  className="w-full"
                   value={list.filters.status}
                   onChange={(v) => list.setFilter('status', v)}
                   placeholder={m.list.statusFilter}
@@ -184,10 +221,6 @@ export function VenuesScreen() {
                     label: c.status[s],
                   }))}
                 />
-                <Button className="h-[43px] rounded-input" onClick={() => openForm(null)}>
-                  <Plus />
-                  {m.list.add}
-                </Button>
               </div>
             </div>
             <ListTable

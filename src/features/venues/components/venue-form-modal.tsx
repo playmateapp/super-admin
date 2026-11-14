@@ -6,10 +6,11 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { FormWrapper, SelectInput, TextInput, TextareaInput } from '@/components/form';
+import { FormWrapper, SelectInput, TextInput } from '@/components/form';
 import { Button, Modal } from '@/components/ui';
 import { MATCH_FORMATS } from '@/lib/constants/match-formats';
-import { useAreas } from '@/lib/hooks/use-areas';
+import { TURF_ROLES, turfErrorMessage } from '@/lib/constants/turf';
+import { useDistricts, useDivisions, useThanas } from '@/lib/hooks/use-locations';
 import { commonMessages } from '@/lib/i18n';
 import { cn, getErrorMessage } from '@/lib/utils';
 import { useMessages } from '@/providers/i18n-provider';
@@ -26,10 +27,11 @@ import {
 } from '../validations/venue.schema';
 
 /**
- * Add / Edit Venue (Figma "All Venues || Add Venue" / "Edit venues"): cover image, turf name,
- * surface, opening hours, phone, facilities, description and the match-format chips. Added to
- * the design: area + location (the app filters by area), owner and a photo gallery (the
- * detail panel shows them) — see docs/DISCUSSIONS.md D-007.
+ * Add / Edit Venue (Figma "All Venues || Add Venue" / "Edit venues" layout) with the fields of
+ * the app's Turf Listing Interest Form, so admin venues and approved turf requests hold the same
+ * data: cover + turf images (at least one), turf name, owner name, role, contact number,
+ * Division / District / Thana, post code, full address, website, Facebook page and the
+ * match-format chips — see docs/DISCUSSIONS.md D-017.
  */
 export function VenueFormModal({
   open,
@@ -45,7 +47,6 @@ export function VenueFormModal({
 }) {
   const m = useMessages(venuesMessages);
   const c = useMessages(commonMessages);
-  const { data: areas } = useAreas();
   const save = useSaveVenue();
   const upload = useUploadVenuePhoto();
   const coverInput = useRef<HTMLInputElement>(null);
@@ -59,13 +60,38 @@ export function VenueFormModal({
     defaultValues: emptyVenueForm,
   });
 
+  const [photoError, setPhotoError] = useState(false);
+  const divisionId = form.watch('division_id');
+  const districtId = form.watch('district_id');
+  const { data: divisions } = useDivisions();
+  const { data: districts } = useDistricts(divisionId ? Number(divisionId) : null);
+  const { data: thanas } = useThanas(districtId ? Number(districtId) : null);
+  // Last location the form showed: a different division / district clears the levels below.
+  const shown = useRef({ division: '', district: '' });
+
   // Load the venue (or a blank form) each time the modal opens.
   useEffect(() => {
     if (!open) return;
-    form.reset(venue ? venueToForm(venue) : emptyVenueForm);
+    const values = venue ? venueToForm(venue) : emptyVenueForm;
+    shown.current = { division: values.division_id, district: values.district_id };
+    form.reset(values);
     setCover(venue?.photo_url ?? '');
     setPhotos(venue?.photos ?? []);
+    setPhotoError(false);
   }, [open, venue, form]);
+
+  useEffect(() => {
+    if (divisionId === shown.current.division) return;
+    shown.current = { division: divisionId, district: '' };
+    form.setValue('district_id', '');
+    form.setValue('thana_id', '');
+  }, [divisionId, form]);
+
+  useEffect(() => {
+    if (districtId === shown.current.district) return;
+    shown.current = { ...shown.current, district: districtId };
+    form.setValue('thana_id', '');
+  }, [districtId, form]);
 
   const uploadFiles = async (files: FileList | null) => {
     const urls: string[] = [];
@@ -81,17 +107,25 @@ export function VenueFormModal({
 
   const onCover = async (e: ChangeEvent<HTMLInputElement>) => {
     const [url] = await uploadFiles(e.target.files);
-    if (url) setCover(url);
+    if (url) {
+      setCover(url);
+      setPhotoError(false);
+    }
     e.target.value = '';
   };
 
   const onGallery = async (e: ChangeEvent<HTMLInputElement>) => {
     const urls = await uploadFiles(e.target.files);
     setPhotos((prev) => [...prev, ...urls]);
+    if (urls.length) setPhotoError(false);
     e.target.value = '';
   };
 
   const onSubmit = async (values: VenueFormValues) => {
+    if (!cover && photos.length === 0) {
+      setPhotoError(true);
+      return;
+    }
     try {
       const id = await save.mutateAsync({
         id: venue?.id ?? null,
@@ -101,7 +135,7 @@ export function VenueFormModal({
       onSaved?.(id);
       onOpenChange(false);
     } catch (err) {
-      toast.error(getErrorMessage(err, c.saveFailed));
+      toast.error(turfErrorMessage(getErrorMessage(err, ''), m.serverErrors, c.saveFailed));
     }
   };
 
@@ -152,69 +186,120 @@ export function VenueFormModal({
           <input ref={coverInput} type="file" accept="image/*" hidden onChange={onCover} />
         </div>
 
-        <TextInput<VenueFormValues> name="name" label={f.name} placeholder={f.namePlaceholder} />
+        <TextInput<VenueFormValues>
+          name="name"
+          required
+          label={f.name}
+          placeholder={f.namePlaceholder}
+        />
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectInput<VenueFormValues> name="area" label={f.area} placeholder={f.areaPlaceholder}>
-            {(areas ?? []).map((a) => (
-              <option key={a} value={a}>
-                {a}
+          <TextInput<VenueFormValues>
+            name="owner_name"
+            required
+            label={f.owner}
+            placeholder={f.ownerPlaceholder}
+          />
+          <SelectInput<VenueFormValues>
+            name="owner_role"
+            label={f.role}
+            optionalLabel={f.optional}
+            placeholder={f.rolePlaceholder}
+          >
+            {TURF_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {m.roles[r]}
               </option>
             ))}
           </SelectInput>
+        </div>
+        <TextInput<VenueFormValues>
+          name="phone"
+          type="tel"
+          dir="ltr"
+          required
+          label={f.phone}
+          placeholder={f.phonePlaceholder}
+        />
+
+        <p className="font-display text-body-sm font-semibold text-content-primary">
+          {f.locationTitle}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SelectInput<VenueFormValues>
+            name="division_id"
+            required
+            label={f.division}
+            placeholder={f.divisionPlaceholder}
+          >
+            {(divisions ?? []).map((d) => (
+              <option key={d.id} value={String(d.id)}>
+                {d.name}
+              </option>
+            ))}
+          </SelectInput>
+          <SelectInput<VenueFormValues>
+            name="district_id"
+            required
+            label={f.district}
+            placeholder={f.districtPlaceholder}
+            disabled={!divisionId}
+          >
+            {(districts ?? []).map((d) => (
+              <option key={d.id} value={String(d.id)}>
+                {d.name}
+              </option>
+            ))}
+          </SelectInput>
+          <SelectInput<VenueFormValues>
+            name="thana_id"
+            required
+            label={f.thana}
+            placeholder={f.thanaPlaceholder}
+            disabled={!districtId}
+          >
+            {(thanas ?? []).map((t) => (
+              <option key={t.id} value={String(t.id)}>
+                {t.name}
+              </option>
+            ))}
+          </SelectInput>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+          <TextInput<VenueFormValues>
+            name="post_code"
+            required
+            label={f.postCode}
+            placeholder={f.postCodePlaceholder}
+          />
           <TextInput<VenueFormValues>
             name="address"
+            required
             label={f.address}
             placeholder={f.addressPlaceholder}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectInput<VenueFormValues>
-            name="surface"
-            label={f.surface}
-            placeholder={f.surfacePlaceholder}
-          >
-            {m.surfaces.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectInput>
           <TextInput<VenueFormValues>
-            name="opening_hours"
-            label={f.hours}
-            placeholder={f.hoursPlaceholder}
-          />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextInput<VenueFormValues>
-            name="phone"
-            type="tel"
+            name="website"
+            type="url"
             dir="ltr"
-            label={f.phone}
-            placeholder={f.phonePlaceholder}
+            label={f.website}
+            optionalLabel={f.optional}
+            placeholder={f.websitePlaceholder}
           />
           <TextInput<VenueFormValues>
-            name="owner_name"
-            label={f.owner}
-            placeholder={f.ownerPlaceholder}
+            name="facebook"
+            type="url"
+            dir="ltr"
+            label={f.facebook}
+            optionalLabel={f.optional}
+            placeholder={f.facebookPlaceholder}
           />
         </div>
-        <TextareaInput<VenueFormValues>
-          name="facilities"
-          label={f.facilities}
-          optionalLabel={f.optional}
-          placeholder={f.facilitiesPlaceholder}
-        />
-        <TextareaInput<VenueFormValues>
-          name="description"
-          label={f.description}
-          optionalLabel={f.optional}
-          placeholder={f.descriptionPlaceholder}
-        />
 
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 font-display text-body-xs font-medium text-content-primary">
-            {f.format}
+            {f.format} <span className="text-danger">*</span>
           </legend>
           <div className="flex flex-wrap gap-2 rounded-[10px] bg-surface-muted p-2">
             {MATCH_FORMATS.map((fmt) => (
@@ -238,8 +323,9 @@ export function VenueFormModal({
 
         <div className="flex flex-col gap-2">
           <span className="font-display text-body-xs font-medium text-content-primary">
-            {f.gallery}
+            {f.gallery} <span className="text-danger">*</span>
           </span>
+          <span className="text-caption text-content-muted">{f.galleryHint}</span>
           <div className="grid grid-cols-4 gap-2">
             {photos.map((url) => (
               <div
@@ -279,6 +365,11 @@ export function VenueFormModal({
             hidden
             onChange={onGallery}
           />
+          {photoError ? (
+            <p role="alert" className="text-body-xs text-danger">
+              {f.photoRequired}
+            </p>
+          ) : null}
         </div>
 
         <Button type="submit" className="w-full" disabled={save.isPending || upload.isPending}>

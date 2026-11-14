@@ -19,5 +19,5 @@ export {
   interpolate,
   type RelativeUnit,
 } from './format';
-export { downloadCsv, toCsv } from './csv';
+export { downloadCsv, parseCsv, toCsv } from './csv';
 export { toE164, maskPhone, isPhoneLike } from './phone';

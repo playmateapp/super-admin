@@ -28,7 +28,8 @@ export interface MatchesParams {
   status?: string;
   from?: string;
   to?: string;
-  area?: string;
+  /** Venue name (matched with ilike on the match venue). */
+  venue?: string;
   page: number;
   pageSize: number;
 }

@@ -1,171 +1,116 @@
 'use client';
 
-import { TrendingUp, Users } from 'lucide-react';
-import { useMemo, type ReactNode } from 'react';
+import {
+  Ban,
+  Coins,
+  Crown,
+  LandPlot,
+  ShieldAlert,
+  UserRound,
+  UserRoundCheck,
+  UsersRound,
+} from 'lucide-react';
+import { useState } from 'react';
 
-import {
-  DesignIcon,
-  EntityAvatar,
-  IdentityCell,
-  ListTable,
-  Panel,
-  PanelTitle,
-  StatStrip,
-  StatusTag,
-  type ListColumn,
-  type StripItem,
-} from '@/components/ui';
+import { DesignIcon } from '@/components/ui';
+import { useProfile } from '@/features/auth';
 import { commonMessages } from '@/lib/i18n';
-import {
-  cn,
-  formatCount,
-  formatDateMedium,
-  formatMonthShort,
-  formatTaka,
-  interpolate,
-  relativeParts,
-} from '@/lib/utils';
+import { formatCount, formatMonthShort, formatTaka, interpolate } from '@/lib/utils';
 import { useMessages } from '@/providers/i18n-provider';
 
-import { AreaChart, BarChart, DonutChart } from '../components/charts';
+import { BarChart, DonutChart, LineChart } from '../components/charts';
+import {
+  DashCard,
+  DivisionCard,
+  PendingActions,
+  RecentMatches,
+  RecentPlayers,
+  StatusSplit,
+  TrendStats,
+  WelcomeBanner,
+  type TrendStat,
+} from '../components/widgets';
 import { useDashboard } from '../hooks/queries';
 import { dashboardMessages } from '../i18n/dashboard.messages';
-import type { DashboardOverview } from '../types';
-
-type RecentUser = DashboardOverview['recent_users'][number];
-type RecentPayment = DashboardOverview['recent_payments'][number];
-
-function ChartCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: ReactNode;
-}) {
-  return (
-    <Panel className="flex min-w-0 flex-col gap-4 p-6">
-      <div className="flex flex-col gap-1 border-b border-line pb-4">
-        <PanelTitle>{title}</PanelTitle>
-        <p className="font-display text-heading-sm text-content-secondary">{subtitle}</p>
-      </div>
-      {children}
-    </Panel>
-  );
-}
+import type { DashboardRange } from '../types';
 
 /**
- * DashboardScreen — `/dashboard` (Figma "Dashboard"): platform totals, subscription split,
- * 6-month revenue and user growth, the newest users and the newest payments.
+ * DashboardScreen — `/dashboard` (PM dashboard mock, 2026-11-14): welcome banner + range,
+ * six totals with 30-day trends, growth / revenue / subscription charts, player and team
+ * status, players / teams / turfs by division, recent players and matches, pending actions.
  */
 export function DashboardScreen() {
   const m = useMessages(dashboardMessages);
   const c = useMessages(commonMessages);
-  const { data, isLoading, isError, refetch } = useDashboard();
+  const [range, setRange] = useState<DashboardRange>(6);
+  const { data } = useDashboard(range);
+  const { data: me } = useProfile();
+
+  const s = data?.stats;
+  const p = data?.previous;
   const v = (n: number | undefined, f: (n: number) => string = formatCount) =>
-    data && n != null ? f(n) : '—';
+    n != null ? f(n) : '—';
 
-  const userColumns = useMemo<ListColumn<RecentUser>[]>(
-    () => [
-      {
-        key: 'name',
-        header: m.recentUsers.name,
-        className: 'w-[200px]',
-        cell: (u) => (
-          <IdentityCell
-            avatar={<EntityAvatar src={u.avatar_url} name={u.full_name} />}
-            name={u.full_name || c.none}
-            sub={interpolate(c.id, { id: u.player_code })}
-          />
-        ),
-      },
-      {
-        key: 'type',
-        header: m.recentUsers.type,
-        className: 'text-center',
-        cell: (u) => (
-          <span
-            className={cn(
-              'whitespace-nowrap text-body-md',
-              u.type === 'team_owner' ? 'text-violet' : 'text-content-link',
-            )}
-          >
-            {c.userType[u.type]}
-          </span>
-        ),
-      },
-      {
-        key: 'status',
-        header: m.recentUsers.status,
-        className: 'w-[100px] text-center',
-        cell: (u) => <StatusTag status={u.status} className="w-full" />,
-      },
-      {
-        key: 'joined',
-        header: m.recentUsers.joined,
-        className: 'text-center',
-        cell: (u) => {
-          const ago = relativeParts(u.created_at);
-          const copy =
-            ago.unit === 'now' ? m.ago.now : m.ago[ago.unit][ago.count === 1 ? 'one' : 'other'];
-          return (
-            <span className="font-display text-body-md text-content-secondary">
-              {interpolate(copy, { count: ago.count })}
-            </span>
-          );
-        },
-      },
-    ],
-    [m, c],
-  );
+  const stats: TrendStat[] = [
+    {
+      key: 'players',
+      label: m.stats.players,
+      tone: 'green',
+      icon: <UsersRound />,
+      value: v(s?.users),
+      current: s?.users,
+      previous: p?.users,
+    },
+    {
+      key: 'teams',
+      label: m.stats.teams,
+      tone: 'blue',
+      icon: <DesignIcon name="jersey" size={24} />,
+      value: v(s?.teams),
+      current: s?.teams,
+      previous: p?.teams,
+    },
+    {
+      key: 'turfs',
+      label: m.stats.turfs,
+      tone: 'violet',
+      icon: <LandPlot />,
+      value: v(s?.turfs),
+      current: s?.turfs,
+      previous: p?.turfs,
+    },
+    {
+      key: 'matches',
+      label: m.stats.matches,
+      tone: 'orange',
+      icon: <DesignIcon name="football" size={24} />,
+      value: v(s?.matches),
+      current: s?.matches,
+      previous: p?.matches,
+    },
+    {
+      key: 'subs',
+      label: m.stats.subscriptions,
+      tone: 'gold',
+      icon: <Crown />,
+      value: v(s?.active_subscriptions),
+      current: s?.active_subscriptions,
+      previous: p?.active_subscriptions,
+    },
+    {
+      key: 'revenue',
+      label: m.stats.revenue,
+      tone: 'violet',
+      icon: <Coins />,
+      value: v(s?.revenue, formatTaka),
+      current: s?.revenue,
+      previous: p?.revenue,
+    },
+  ];
 
-  const paymentColumns = useMemo<ListColumn<RecentPayment>[]>(
-    () => [
-      {
-        key: 'team',
-        header: m.recentPayments.team,
-        className: 'w-[200px]',
-        cell: (p) => {
-          const name = p.team?.name ?? p.payer?.name ?? c.none;
-          return (
-            <IdentityCell
-              avatar={<EntityAvatar src={p.team?.logo_url ?? p.payer?.avatar_url} name={name} />}
-              name={name}
-              sub={interpolate(c.id, { id: p.team?.team_code ?? p.payer?.player_code ?? '' })}
-            />
-          );
-        },
-      },
-      {
-        key: 'amount',
-        header: m.recentPayments.amount,
-        className: 'text-center',
-        cell: (p) => (
-          <span className="font-display text-body-md">
-            {p.amount === 0 ? m.recentPayments.free : formatTaka(p.amount)}
-          </span>
-        ),
-      },
-      {
-        key: 'status',
-        header: m.recentPayments.status,
-        className: 'w-[100px] text-center',
-        cell: (p) => <StatusTag status={p.status} className="w-full" />,
-      },
-      {
-        key: 'date',
-        header: m.recentPayments.date,
-        className: 'text-center',
-        cell: (p) => (
-          <span className="font-display text-body-md text-content-secondary">
-            {formatDateMedium(p.date)}
-          </span>
-        ),
-      },
-    ],
-    [m, c],
-  );
+  const growth = data?.growth ?? [];
+  const revenue = data?.revenue ?? [];
+  const revenueTotal = revenue.reduce((sum, r) => sum + r.amount, 0);
 
   const status = data?.subscription_status;
   const slices = [
@@ -180,8 +125,8 @@ export function DashboardScreen() {
       key: 'expiring',
       label: m.subscriptionStatus.expiring,
       value: status?.expiring ?? 0,
-      stroke: 'stroke-warning',
-      swatch: 'bg-warning',
+      stroke: 'stroke-gold',
+      swatch: 'bg-gold',
     },
     {
       key: 'expired',
@@ -192,116 +137,186 @@ export function DashboardScreen() {
     },
   ];
 
-  const growthCard = (
-    <ChartCard title={m.growth.title} subtitle={m.growth.subtitle}>
-      <AreaChart
-        label={m.growth.chartLabel}
-        format={(n) => interpolate(m.growth.users, { count: formatCount(n) })}
-        data={(data?.user_growth ?? []).map((g) => ({
-          label: formatMonthShort(g.month),
-          value: g.users,
-        }))}
-      />
-    </ChartCard>
-  );
-
-  const recentUsers = (
-    <Panel className="flex min-w-0 flex-col gap-4 p-4">
-      <PanelTitle>{m.recentUsers.title}</PanelTitle>
-      <ListTable
-        columns={userColumns}
-        rows={data?.recent_users}
-        getRowId={(u) => u.id}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={refetch}
-        minWidth={540}
-      />
-    </Panel>
-  );
-
-  const baseStats: StripItem[] = [
-    {
-      key: 'users',
-      label: m.stats.users,
-      tone: 'green',
-      icon: <Users className="text-content-brand" strokeWidth={1.75} />,
-      value: v(data?.stats.users),
-    },
-    {
-      key: 'teams',
-      label: m.stats.teams,
-      tone: 'blue',
-      icon: <DesignIcon name="jersey" size={23} />,
-      value: v(data?.stats.teams),
-    },
-    {
-      key: 'matches',
-      label: m.stats.matches,
-      tone: 'cyan',
-      icon: <DesignIcon name="football" size={24} />,
-      value: v(data?.stats.matches),
-    },
-  ];
-  const paymentStats: StripItem[] = [
-    {
-      key: 'subs',
-      label: m.stats.subscriptions,
-      tone: 'gold',
-      icon: <DesignIcon name="crown" size={24} />,
-      value: v(data?.stats.active_subscriptions),
-    },
-    {
-      key: 'revenue',
-      label: m.stats.revenue,
-      tone: 'indigo',
-      icon: <TrendingUp className="text-violet" strokeWidth={1.75} />,
-      value: v(data?.stats.revenue, formatTaka),
-    },
-  ];
-
   return (
-    <div className="flex flex-col gap-5">
-      <StatStrip items={[...baseStats, ...paymentStats]} />
+    <div className="flex flex-col gap-4">
+      <WelcomeBanner
+        name={me?.full_name?.trim() || m.banner.fallbackName}
+        range={range}
+        onRange={setRange}
+      />
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <ChartCard title={m.subscriptionStatus.title} subtitle={m.subscriptionStatus.subtitle}>
+      <TrendStats items={stats} />
+
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <DashCard title={m.growth.title}>
+          <ul className="-mt-2 flex flex-wrap gap-4 text-caption text-content-secondary">
+            {[
+              [m.growth.players, 'bg-success'],
+              [m.growth.teams, 'bg-info'],
+              [m.growth.turfs, 'bg-violet'],
+            ].map(([label, color]) => (
+              <li key={label} className="flex items-center gap-1.5">
+                <span aria-hidden className={`size-2.5 rounded-full ${color}`} />
+                {label}
+              </li>
+            ))}
+          </ul>
+          <LineChart
+            label={m.growth.chartLabel}
+            format={formatCount}
+            labels={growth.map((g) => formatMonthShort(g.month))}
+            series={[
+              {
+                key: 'players',
+                label: m.growth.players,
+                values: growth.map((g) => g.players),
+                stroke: 'stroke-success',
+                fill: 'bg-success',
+                area: true,
+              },
+              {
+                key: 'teams',
+                label: m.growth.teams,
+                values: growth.map((g) => g.teams),
+                stroke: 'stroke-info',
+                fill: 'bg-info',
+              },
+              {
+                key: 'turfs',
+                label: m.growth.turfs,
+                values: growth.map((g) => g.turfs),
+                stroke: 'stroke-violet',
+                fill: 'bg-violet',
+              },
+            ]}
+          />
+        </DashCard>
+
+        <DashCard title={m.revenue.title}>
+          <p className="-mt-2 flex items-center gap-2 font-display">
+            <span className="text-heading-lg font-bold text-content-primary">
+              {data ? formatTaka(revenueTotal) : '—'}
+            </span>
+            <span className="text-caption text-content-muted">{m.banner.range[range]}</span>
+          </p>
+          <BarChart
+            label={m.revenue.chartLabel}
+            format={formatTaka}
+            data={revenue.map((r) => ({ label: formatMonthShort(r.month), value: r.amount }))}
+          />
+        </DashCard>
+
+        <DashCard title={m.subscriptionStatus.title} className="lg:col-span-2 2xl:col-span-1">
           <DonutChart
             slices={slices}
             centreValue={status?.active ?? 0}
             centreLabel={m.subscriptionStatus.centre}
             label={interpolate(m.subscriptionStatus.chartLabel, {
-              summary: slices.map((s) => `${s.label} ${s.value}`).join(', '),
+              summary: slices.map((x) => `${x.label} ${x.value}`).join(', '),
             })}
           />
-        </ChartCard>
-        <ChartCard title={m.revenue.title} subtitle={m.revenue.subtitle}>
-          <BarChart
-            label={m.revenue.chartLabel}
-            format={formatTaka}
-            data={(data?.revenue ?? []).map((r) => ({
-              label: formatMonthShort(r.month),
-              value: r.amount,
-            }))}
-          />
-        </ChartCard>
-        {growthCard}
+        </DashCard>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        {recentUsers}
-        <Panel className="flex min-w-0 flex-col gap-4 p-4">
-          <PanelTitle>{m.recentPayments.title}</PanelTitle>
-          <ListTable
-            columns={paymentColumns}
-            rows={data?.recent_payments}
-            getRowId={(p) => p.id}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
-            minWidth={540}
-          />
-        </Panel>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <StatusSplit
+          title={m.playerStatus.title}
+          icon={<UserRound />}
+          href="/users"
+          rows={[
+            {
+              key: 'active',
+              label: m.playerStatus.active,
+              value: data?.player_status?.active,
+              icon: <UserRoundCheck />,
+              tone: 'ok',
+            },
+            {
+              key: 'blocked',
+              label: m.playerStatus.blocked,
+              value: data?.player_status?.blocked,
+              icon: <Ban />,
+              tone: 'bad',
+            },
+          ]}
+        />
+        <StatusSplit
+          title={m.teamStatus.title}
+          icon={<UsersRound />}
+          href="/teams"
+          rows={[
+            {
+              key: 'active',
+              label: m.teamStatus.active,
+              value: data?.team_status?.active,
+              icon: <UsersRound />,
+              tone: 'ok',
+            },
+            {
+              key: 'blocked',
+              label: m.teamStatus.blocked,
+              value: data?.team_status?.blocked,
+              icon: <Ban />,
+              tone: 'bad',
+            },
+          ]}
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <DivisionCard
+          title={m.divisions.players}
+          icon={<UserRound />}
+          href="/users"
+          data={data?.divisions?.players}
+        />
+        <DivisionCard
+          title={m.divisions.teams}
+          icon={<UsersRound />}
+          href="/teams"
+          data={data?.divisions?.teams}
+        />
+        <DivisionCard
+          title={m.divisions.turfs}
+          icon={<LandPlot />}
+          href="/venues"
+          data={data?.divisions?.turfs}
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <RecentPlayers
+          title={m.recentPlayers.title}
+          href="/users"
+          users={data?.recent_users}
+          typeLabel={(t) => c.userType[t]}
+        />
+        <RecentMatches href="/matches" matches={data?.recent_matches} />
+        <PendingActions
+          rows={[
+            {
+              key: 'turfs',
+              label: m.pending.turfRequests,
+              count: data?.pending?.turf_requests,
+              href: '/turf-requests',
+              icon: <LandPlot />,
+            },
+            {
+              key: 'players',
+              label: m.pending.playerAppeals,
+              count: data?.pending?.player_appeals,
+              href: '/appeals',
+              icon: <ShieldAlert />,
+            },
+            {
+              key: 'teams',
+              label: m.pending.teamAppeals,
+              count: data?.pending?.team_appeals,
+              href: '/appeals?kind=team',
+              icon: <UsersRound />,
+            },
+          ]}
+        />
       </div>
     </div>
   );

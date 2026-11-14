@@ -8,8 +8,10 @@ import type { Venue, VenueInput, VenuesParams, VenuesResponse } from '../types';
 export const getVenues = (p: VenuesParams) =>
   rpc<VenuesResponse>('admin_venues', {
     p_search: p.search ?? '',
-    p_area: p.area ?? '',
     p_status: p.status ?? '',
+    p_division: p.divisionId ?? null,
+    p_district: p.districtId ?? null,
+    p_thana: p.thanaId ?? null,
     p_page: p.page,
     p_page_size: p.pageSize,
   });

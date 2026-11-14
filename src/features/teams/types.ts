@@ -97,3 +97,10 @@ export interface TeamDetail {
   players: TeamPlayer[];
   recent_matches: TeamMatch[];
 }
+
+/** The slice of `admin_user(id)` the team panel shows for the owner / captain. */
+export interface TeamContact {
+  id: string;
+  full_name: string;
+  phone: string;
+}

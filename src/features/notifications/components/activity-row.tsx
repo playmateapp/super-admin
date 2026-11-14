@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Clock, MapPin, X } from 'lucide-react';
+import { Check, Clock, Mail, MailOpen, MapPin, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { DesignIcon, EntityAvatar } from '@/components/ui';
@@ -55,8 +55,19 @@ function KindIcon({ item }: { item: ActivityItem }) {
   return icons[item.kind] ?? <EntityAvatar src={item.data.image} name={name} size={44} />;
 }
 
-/** One feed row (Figma "Notifications"): icon, bold title, grey sentence, time on the end. */
-export function ActivityRow({ item }: { item: ActivityItem }) {
+/**
+ * One feed row (Figma "Notifications"): icon, bold title, grey sentence, time on the end, and a
+ * read / unread toggle. Unread rows are highlighted with a green dot.
+ */
+export function ActivityRow({
+  item,
+  onToggleRead,
+  busy,
+}: {
+  item: ActivityItem;
+  onToggleRead: (item: ActivityItem) => void;
+  busy?: boolean;
+}) {
   const m = useMessages(notificationsMessages);
   const copy =
     item.kind === 'subscription_activated' && item.data.free
@@ -92,9 +103,28 @@ export function ActivityRow({ item }: { item: ActivityItem }) {
         <p className="font-display text-body-xs font-medium text-content-primary">{copy.title}</p>
         <p className="line-clamp-2 font-display text-body-xs text-content-secondary">{body}</p>
       </div>
-      <span className="shrink-0 pt-1 font-display text-caption text-content-muted">
-        {interpolate(m.ago[ago.unit as RelativeUnit], { count: ago.count })}
-      </span>
+      <div className="flex shrink-0 flex-col items-end gap-1 pt-1">
+        <span className="flex items-center gap-1.5 font-display text-caption text-content-muted">
+          {item.unread ? (
+            <span aria-label={m.filters.unread} className="size-2 rounded-full bg-brand-500" />
+          ) : null}
+          {interpolate(m.ago[ago.unit as RelativeUnit], { count: ago.count })}
+        </span>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onToggleRead(item)}
+          aria-label={item.unread ? m.markRead : m.markUnread}
+          title={item.unread ? m.markRead : m.markUnread}
+          className="grid size-7 place-items-center rounded-input text-content-secondary outline-none transition-colors hover:bg-surface-muted hover:text-content-primary focus-visible:ring-4 focus-visible:ring-brand-500/25 disabled:opacity-50"
+        >
+          {item.unread ? (
+            <MailOpen aria-hidden className="size-4" />
+          ) : (
+            <Mail aria-hidden className="size-4" />
+          )}
+        </button>
+      </div>
     </li>
   );
 }

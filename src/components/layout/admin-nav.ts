@@ -4,6 +4,7 @@ import {
   House,
   Map as MapIcon,
   MapPin,
+  MapPinned,
   Settings,
   ShieldAlert,
   User,
@@ -38,7 +39,8 @@ export const adminNav: AdminNavLink[] = [
   { key: 'teams', labelKey: 'teams', icon: Users, href: '/teams' },
   { key: 'matches', labelKey: 'matches', icon: CalendarDays, href: '/matches' },
   { key: 'venues', labelKey: 'venues', icon: MapPin, href: '/venues' },
-  { key: 'areas', labelKey: 'areas', icon: MapIcon, href: '/areas' },
+  { key: 'turfRequests', labelKey: 'turfRequests', icon: MapIcon, href: '/turf-requests' },
+  { key: 'locations', labelKey: 'locations', icon: MapPinned, href: '/locations' },
   {
     key: 'subscriptions',
     labelKey: 'subscriptions',

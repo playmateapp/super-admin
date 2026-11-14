@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { cn, formatCount } from '@/lib/utils';
 
 /**
- * Dashboard charts (Figma "Subscription Status", "Revenue Overview", "User Growth"), drawn as
+ * Dashboard charts ("Subscription Status", "Revenue Overview", "User, Team & Turf Growth"), drawn as
  * SVG so they follow the theme tokens. Each mark has a hover / focus tooltip; values are also
  * in the legend or the accessible label, so nothing relies on colour alone.
  */
@@ -123,9 +123,13 @@ export function BarChart({
               />
               <path
                 d={`M${x},${y + h} V${y + Math.min(4, h)} Q${x},${y} ${x + Math.min(4, barW / 2)},${y} H${x + barW - Math.min(4, barW / 2)} Q${x + barW},${y} ${x + barW},${y + Math.min(4, h)} V${y + h} Z`}
+                style={{
+                  opacity:
+                    hover !== null && hover !== i ? 0.35 : 0.35 + (0.65 * (i + 1)) / data.length,
+                }}
                 className={cn(
-                  'fill-brand-300 transition-opacity',
-                  hover !== null && hover !== i && 'opacity-50',
+                  i === data.length - 1 ? 'fill-brand-500' : 'fill-success',
+                  'transition-opacity',
                 )}
               />
             </g>
@@ -144,73 +148,88 @@ export function BarChart({
   );
 }
 
-/** Single-series area + 2px line (cumulative users), crosshair tooltip. */
-export function AreaChart({
-  data,
+export interface LineSeries {
+  key: string;
+  label: string;
+  values: number[];
+  /** Tailwind stroke / fill classes from the tokens (`stroke-success`, `fill-success`). */
+  stroke: string;
+  fill: string;
+  /** Shade the area under this series (the first, biggest one). */
+  area?: boolean;
+}
+
+/** Multi-series lines with dots (players / teams / turfs over time), crosshair tooltip. */
+export function LineChart({
+  labels,
+  series,
   label,
   format,
 }: {
-  data: { label: string; value: number }[];
+  labels: string[];
+  series: LineSeries[];
   label: string;
   format: (v: number) => string;
 }) {
   const [hover, setHover] = useState<number | null>(null);
-  const { top, ticks } = niceScale(Math.max(...data.map((d) => d.value), 0));
-  const slot = plotW / Math.max(data.length, 1);
-  const pts = data.map((d, i) => ({
-    x: PAD.left + slot * (i + 0.5),
-    y: PAD.top + plotH - (d.value / top) * plotH,
-  }));
-  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
+  const { top, ticks } = niceScale(Math.max(...series.flatMap((s) => s.values), 0));
+  const slot = plotW / Math.max(labels.length, 1);
   const base = PAD.top + plotH;
-  const area = pts.length ? `${line} L${pts[pts.length - 1].x},${base} L${pts[0].x},${base} Z` : '';
+  const x = (i: number) => PAD.left + slot * (i + 0.5);
+  const y = (v: number) => base - (v / top) * plotH;
 
   return (
     <div className="relative">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} className="h-auto w-full">
         <defs>
           <linearGradient id="growth-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" className="[stop-color:rgb(var(--brand-300))] [stop-opacity:0.45]" />
-            <stop
-              offset="100%"
-              className="[stop-color:rgb(var(--brand-300))] [stop-opacity:0.03]"
-            />
+            <stop offset="0%" className="[stop-color:rgb(var(--success))] [stop-opacity:0.3]" />
+            <stop offset="100%" className="[stop-color:rgb(var(--success))] [stop-opacity:0.02]" />
           </linearGradient>
         </defs>
-        <Axes ticks={ticks} top={top} labels={data.map((d) => d.label)} />
-        {pts.map((p, i) => (
-          <line key={i} x1={p.x} x2={p.x} y1={PAD.top} y2={base} className="stroke-line" />
-        ))}
-        <path d={area} fill="url(#growth-fill)" />
-        <path
-          d={line}
-          fill="none"
-          strokeWidth={2}
-          className="stroke-brand-300"
-          strokeLinejoin="round"
-        />
-        {hover !== null && pts[hover] ? (
-          <>
-            <line
-              x1={pts[hover].x}
-              x2={pts[hover].x}
-              y1={PAD.top}
-              y2={base}
-              className="stroke-content-muted"
-              strokeDasharray="3 3"
-            />
-            <circle
-              cx={pts[hover].x}
-              cy={pts[hover].y}
-              r={4.5}
-              strokeWidth={2}
-              className="fill-brand-300 stroke-surface-card"
-            />
-          </>
+        <Axes ticks={ticks} top={top} labels={labels} />
+        {hover !== null ? (
+          <line
+            x1={x(hover)}
+            x2={x(hover)}
+            y1={PAD.top}
+            y2={base}
+            className="stroke-content-muted"
+            strokeDasharray="3 3"
+          />
         ) : null}
-        {pts.map((p, i) => (
+        {series.map((s) => {
+          const line = s.values.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join(' ');
+          const area =
+            s.area && s.values.length
+              ? `${line} L${x(s.values.length - 1)},${base} L${x(0)},${base} Z`
+              : '';
+          return (
+            <g key={s.key}>
+              {area ? <path d={area} fill="url(#growth-fill)" /> : null}
+              <path
+                d={line}
+                fill="none"
+                strokeWidth={2}
+                strokeLinejoin="round"
+                className={s.stroke}
+              />
+              {s.values.map((v, i) => (
+                <circle
+                  key={i}
+                  cx={x(i)}
+                  cy={y(v)}
+                  r={hover === i ? 4.5 : 3.5}
+                  strokeWidth={2}
+                  className={cn('fill-surface-card', s.stroke)}
+                />
+              ))}
+            </g>
+          );
+        })}
+        {labels.map((l, i) => (
           <rect
-            key={i}
+            key={l + i}
             x={PAD.left + slot * i}
             y={PAD.top}
             width={slot}
@@ -225,13 +244,20 @@ export function AreaChart({
           />
         ))}
       </svg>
-      {hover !== null && data[hover] ? (
-        <Tooltip
-          x={pts[hover].x}
-          y={pts[hover].y - 8}
-          title={data[hover].label}
-          value={format(data[hover].value)}
-        />
+      {hover !== null && labels[hover] ? (
+        <div
+          role="presentation"
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-[8px] border border-line bg-surface-card px-2.5 py-1.5 text-caption shadow-float"
+          style={{ left: `${(x(hover) / W) * 100}%` }}
+        >
+          <p className="text-content-muted">{labels[hover]}</p>
+          {series.map((s) => (
+            <p key={s.key} className="flex items-center gap-1.5 text-content-primary">
+              <span aria-hidden className={cn('size-2 rounded-full', s.fill)} />
+              {s.label}: <span className="font-semibold">{format(s.values[hover] ?? 0)}</span>
+            </p>
+          ))}
+        </div>
       ) : null}
     </div>
   );

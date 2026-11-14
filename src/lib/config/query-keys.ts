@@ -9,11 +9,14 @@ export const queryKeys = {
   },
   reference: {
     all: () => ['reference'] as const,
-    areas: () => ['reference', 'areas'] as const,
+    divisions: () => ['reference', 'divisions'] as const,
+    districts: (divisionId: number) => ['reference', 'districts', divisionId] as const,
+    thanas: (districtId: number) => ['reference', 'thanas', districtId] as const,
+    venueNames: () => ['reference', 'venue-names'] as const,
   },
   dashboard: {
     all: () => ['dashboard'] as const,
-    overview: () => ['dashboard', 'overview'] as const,
+    overview: (months: number = 6) => ['dashboard', 'overview', months] as const,
   },
   users: {
     all: () => ['users'] as const,
@@ -44,12 +47,17 @@ export const queryKeys = {
     list: (params: object = {}) => ['subscriptions', 'list', params] as const,
     detail: (id: string) => ['subscriptions', 'detail', id] as const,
   },
-  areas: {
-    all: () => ['areas'] as const,
-    list: (params: object = {}) => ['areas', 'list', params] as const,
+  turfRequests: {
+    all: () => ['turf-requests'] as const,
+    list: (params: object = {}) => ['turf-requests', 'list', params] as const,
+    detail: (id: string) => ['turf-requests', 'detail', id] as const,
+  },
+  locations: {
+    all: () => ['locations'] as const,
+    list: (params: object = {}) => ['locations', 'list', params] as const,
   },
   activity: {
     all: () => ['activity'] as const,
-    feed: () => ['activity', 'feed'] as const,
+    feed: (params: object = {}) => ['activity', 'feed', params] as const,
   },
 } as const;

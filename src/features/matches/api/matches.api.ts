@@ -12,7 +12,7 @@ export const getMatches = (p: MatchesParams) =>
     p_status: p.status ?? '',
     p_from: p.from || null,
     p_to: p.to || null,
-    p_area: p.area ?? '',
+    p_area: p.venue ?? '',
     p_page: p.page,
     p_page_size: p.pageSize,
   });

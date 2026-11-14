@@ -2,6 +2,139 @@
 
 Newest first. One entry per task: date, task, then Added / Changed / Fixed / Notes.
 
+## 2026-11-14 — Notifications: date / read filters + read / unread
+
+**Added**
+- `/notifications` toolbar: Date filter (Any time, Today, Yesterday, Last 7 days, Custom date →
+  from/to range picker) and Status filter (All, Unread, Read). Filtering is server-side.
+- Per-row read / unread toggle (envelope button) and a green dot on unread rows.
+- "Mark all as read" / "Mark all as unread" buttons with success/error toasts.
+- "Showing X of Y" footer when more than 200 items match.
+- App migration `20261114000031_admin_activity_read_state.sql` (applied): table
+  `admin_activity_reads` (per-admin overrides keyed by kind + ref), `admin_activity(p_limit,
+  p_from, p_to, p_status)` now returns `total` too, new RPCs `admin_set_activity_read` and
+  `admin_mark_all_activity`.
+- EN + BN copy for all of the above.
+
+**Changed**
+- Opening the page no longer marks everything as seen; the bell count only drops when the admin
+  marks items read (D-019). `admin_mark_activity_seen()` kept as an alias of mark-all-read.
+- `queryKeys.activity.feed(params)` now takes the filters.
+
+## 2026-11-14 — Teams: owner / captain contacts on the detail panel
+
+**Added**
+- Teams detail → Over View: "Team Management" block with the owner and captain (avatar, name,
+  phone). Each row links to `/users?user=<id>`, which opens that player's detail panel.
+- Users screen reads `?user=<id>` on load (same pattern as `/teams?team=<id>`).
+- EN + BN copy: `management`, `noCaptain`, `openUser`.
+
+**Notes**
+- No DB change: captain = first `players` entry with role `captain`; phone comes from
+  `admin_user(id)` cached under `queryKeys.users.detail(id)`, so opening the user is instant.
+- Found live DB is missing app migration `20261112000025_admin_team_appeal_flags.sql`
+  (`admin_team.appeal`, `admin_teams.appeal_pending` / `stats.appeals`). Apply it so the team
+  unblock-request card and "Appeal requested" filter work.
+
+## 2026-11-14 — Users: new profile fields (gender, profile type, location)
+
+**Added**
+- Users list: second filter row — Gender, Profile Type, Division. Profile type and division
+  options come from the database (`options` in the `admin_users` response).
+- Users list: the name cell's sub line shows the profile type next to the ID.
+- Users list: Location column ("Thana, District" over "Division · Post code"); search also
+  matches location names (migration `20261114000030_admin_users_location_parts.sql`, applied —
+  rows now carry `division`, `district`, `thana`).
+- Users detail → Player Information: Division, District, Thana / Upazila and Post Code as
+  separate rows, plus Gender, Profile Type, Date of Birth.
+- EN + BN copy for the new labels and for gender / profile type values.
+
+**Changed**
+- `admin_users` now takes `p_gender`, `p_profile_type`, `p_division` (old 5-arg signature
+  dropped) and returns `gender`, `profile_type`, `location`, `post_code` per row; search also
+  matches post code. `admin_user` adds `division`, `district`, `thana`, `post_code`. App repo
+  migration `20261114000029_admin_users_profile_fields.sql` (applied).
+
+## 2026-11-14 — Dashboard v2 (PM feedback)
+
+**Added**
+- Welcome banner with the admin's name and a range picker (30 days / 3 / 6 / 12 months) that
+  drives the revenue and growth charts.
+- Six totals with "vs last 30 days" trends: Players, Teams, Turfs, Matches, Active
+  Subscriptions, Revenue (trend hidden while the 30-days-ago value is 0).
+- "User, Team & Turf Growth" 3-series line chart (cumulative per month); revenue card shows the
+  range total.
+- Player Status / Team Status (active vs blocked, with share bars).
+- Players / Teams / Turfs by Division (top 3 divisions + Others; a team's division is its
+  owner's; Others includes people/turfs with no division set).
+- Recently Joined (4), Recent Matches (live → latest finished → next upcoming, score or "vs",
+  status pill, Today/Tomorrow time), Pending Actions (turf requests pending + appealed, player
+  appeals, team appeals) with links.
+
+**Changed**
+- `admin_dashboard()` → `admin_dashboard(p_months int default 6)` (app repo migration
+  `20261114000028_admin_dashboard_v2.sql`): adds `stats.turfs`, `previous`, `growth`,
+  `player_status`, `team_status`, `divisions`, `recent_matches`, `pending`. Old keys kept.
+- `queryKeys.dashboard.overview(months)`. Recent Payments table removed from the dashboard
+  (still under Subscriptions).
+
+**Removed**
+- `AreaChart` (replaced by `LineChart`).
+
+## 2026-11-14 — Turfs: turf requests, venue = turf, areas retired
+
+**Added**
+- `/turf-requests` (sidebar "Turf Requests", after Venues): status tabs (Pending / Appealed /
+  Approved / Rejected / All), search, stat strip, list + detail panel (photos, all form fields,
+  applicant, the owner's appeal, the rejection reason). Approve publishes the request as a venue
+  and notifies the owner; Reject needs a reason (the owner reads it in the app and can appeal
+  once); Delete removes the request so the owner can apply again (an approved turf stays listed).
+  `?request=<id>` opens one request (linked from the venue panel).
+- `lib/hooks/use-locations.ts` (divisions / districts / thanas), `use-venue-names.ts`
+  (`venue_cards`), `lib/constants/turf.ts` (owner roles, turf RPC error codes → messages).
+
+**Changed**
+- Venues = turfs. Add / Edit Venue has the app's Turf Listing Interest Form fields: turf name,
+  owner name, role, contact number, Division / District / Thana, post code, full address,
+  website, Facebook page, match format and turf images (at least one, required). Surface,
+  opening hours, facilities and description are no longer edited (columns kept).
+- Venues list filters: Division / District / Thana instead of Area; the detail panel shows the
+  new fields and links to the source turf request.
+- Matches: the "All Location" (area) filter is now "All Venues" (published venue names).
+- Users detail "Location" shows Thana, District, Division, Post Code (`admin_user.area` now
+  carries that label).
+
+**Removed**
+- The Areas module (`/areas`, `features/areas`, `use-areas.ts`) — the app no longer uses areas.
+
+**Notes**
+- Backend: app repo migration `20261114000027_turfs.sql` (`turf_requests`, `venue_cards`,
+  `my_turf_request`, `submit_turf_request`, `appeal_turf_request`, `admin_turf_requests`,
+  `admin_turf_request`, `admin_approve_turf_request`, `admin_reject_turf_request`,
+  `admin_delete_turf_request`; new `admin_venues` signature with location filters; venues get
+  location / role / website / facebook columns; players can no longer write venues; `areas` and
+  the area RPCs dropped).
+
+## 2026-11-14 — Locations (Division → District → Thana) with CSV bulk upload
+
+**Added**
+- `/locations` (sidebar "Locations", after Areas): tabs for Divisions / Districts / Thanas /
+  Upazilas, search, division + district filters, stat strip (totals), per-row child and player
+  counts, add / edit modal (districts pick a division; thanas pick a division, then a district),
+  delete (refused while players use it: `location_in_use:<n>`).
+- Bulk Upload modal: download a `Division,District,Thana` CSV template, choose a file, see the
+  row count, upload. Missing rows are added (case-insensitive match), nothing is deleted; large
+  files go up in 5000-row batches.
+- `parseCsv()` in `lib/utils/csv.ts` (RFC 4180, BOM, CRLF).
+
+**Notes**
+- Backend: app repo migration `20261114000026_profile_type_location.sql` (applied 2026-11-14):
+  `profile_types` (fixed: School / College / University Student, Job Holder), `divisions`,
+  `districts`, `thanas` (seeded: 8 divisions, 64 districts, Dhaka district's 53 thanas),
+  profile columns `gender`, `profile_type`, `division_id`, `district_id`, `thana_id`, `post_code`,
+  and the admin RPCs `admin_locations`, `admin_save_location`, `admin_delete_location`,
+  `admin_import_locations`. Post codes are typed by players, so they are not managed here.
+
 ## 2026-11-12 — Team unblock requests on the Teams screen
 
 **Added**

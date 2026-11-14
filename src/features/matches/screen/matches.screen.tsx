@@ -23,7 +23,7 @@ import {
   type ListColumn,
 } from '@/components/ui';
 import { MATCH_FORMATS } from '@/lib/constants/match-formats';
-import { useAreas } from '@/lib/hooks/use-areas';
+import { useVenueNames } from '@/lib/hooks/use-venue-names';
 import { useListState } from '@/lib/hooks/use-list-state';
 import { commonMessages } from '@/lib/i18n';
 import { formatClock, formatCount, formatDay, interpolate } from '@/lib/utils';
@@ -56,17 +56,17 @@ function TeamMini({ name, logo }: { name: string; logo: string }) {
 export function MatchesScreen() {
   const m = useMessages(matchesMessages);
   const c = useMessages(commonMessages);
-  const list = useListState({ format: '', status: '', area: '' });
+  const list = useListState({ format: '', status: '', venue: '' });
   const [range, setRange] = useState<DateRange>({ from: '', to: '' });
   const [cancelTarget, setCancelTarget] = useState<CancelTarget | null>(null);
-  const { data: areas } = useAreas();
+  const { data: venueNames } = useVenueNames();
 
   const params = useMemo(
     () => ({
       search: list.debouncedSearch,
       format: list.filters.format,
       status: list.filters.status,
-      area: list.filters.area,
+      venue: list.filters.venue,
       from: range.from,
       to: range.to,
       page: list.page,
@@ -198,11 +198,11 @@ export function MatchesScreen() {
               />
               <FilterMenu
                 className="sm:w-auto"
-                value={list.filters.area}
-                onChange={(v) => list.setFilter('area', v)}
-                placeholder={m.list.areaFilter}
-                allLabel={m.list.allAreas}
-                options={(areas ?? []).map((a) => ({ value: a, label: a }))}
+                value={list.filters.venue}
+                onChange={(v) => list.setFilter('venue', v)}
+                placeholder={m.list.venueFilter}
+                allLabel={m.list.allVenues}
+                options={(venueNames ?? []).map((a) => ({ value: a, label: a }))}
               />
             </div>
             <ListTable

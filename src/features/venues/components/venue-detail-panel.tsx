@@ -1,6 +1,7 @@
 'use client';
 
-import { CalendarDays, Clock, MapPin, Phone, Star, User } from 'lucide-react';
+import { BadgeCheck, CalendarDays, Globe, Link2, Mail, MapPin, Phone, User } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import {
@@ -102,8 +103,11 @@ export function VenueDetailPanel({
           <InfoItem
             icon={<MapPin />}
             label={d.location}
-            value={[venue.address, venue.area].filter(Boolean).join(', ') || c.none}
+            value={
+              [venue.thana, venue.district, venue.division].filter(Boolean).join(', ') || c.none
+            }
           />
+          <InfoItem icon={<MapPin />} label={d.address} value={venue.address || c.none} />
           <InfoDivider />
           <InfoColumns
             left={
@@ -113,12 +117,17 @@ export function VenueDetailPanel({
                   label={d.format}
                   value={venue.format || c.none}
                 />
+                <InfoItem icon={<Mail />} label={d.postCode} value={venue.post_code || c.none} />
+                <InfoItem icon={<User />} label={d.owner} value={venue.owner_name || c.none} />
                 <InfoItem
-                  icon={<CalendarDays />}
-                  label={d.surface}
-                  value={venue.surface || c.none}
+                  icon={<BadgeCheck />}
+                  label={d.role}
+                  value={
+                    venue.owner_role
+                      ? (m.roles[venue.owner_role as keyof typeof m.roles] ?? venue.owner_role)
+                      : c.none
+                  }
                 />
-                <InfoItem icon={<Star />} label={d.facilities} value={venue.facilities || c.none} />
               </>
             }
             right={
@@ -128,24 +137,62 @@ export function VenueDetailPanel({
                   label={d.status}
                   value={<StatusTag status={venue.status} className="min-w-0" />}
                 />
-                <InfoItem icon={<User />} label={d.owner} value={venue.owner_name || c.none} />
                 <InfoItem
                   icon={<Phone />}
                   label={d.contact}
                   value={venue.phone ? <span dir="ltr">{venue.phone}</span> : c.none}
                 />
-                <InfoItem icon={<Clock />} label={d.hours} value={venue.opening_hours || c.none} />
+                <InfoItem
+                  icon={<Globe />}
+                  label={d.website}
+                  value={
+                    venue.website ? (
+                      <a
+                        href={venue.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        dir="ltr"
+                        className="break-all text-content-brand underline"
+                      >
+                        {venue.website}
+                      </a>
+                    ) : (
+                      c.none
+                    )
+                  }
+                />
+                <InfoItem
+                  icon={<Link2 />}
+                  label={d.facebook}
+                  value={
+                    venue.facebook ? (
+                      <a
+                        href={venue.facebook}
+                        target="_blank"
+                        rel="noreferrer"
+                        dir="ltr"
+                        className="break-all text-content-brand underline"
+                      >
+                        {venue.facebook}
+                      </a>
+                    ) : (
+                      c.none
+                    )
+                  }
+                />
               </>
             }
           />
-          {venue.description ? (
-            <div className="mt-2 rounded-card border border-line p-2.5 text-caption">
-              <p className="text-content-muted">{d.description}</p>
-              <p className="whitespace-pre-line text-content-primary">{venue.description}</p>
-            </div>
-          ) : null}
-          {venue.added_by_player ? (
-            <p className="text-caption text-content-muted">{d.addedByPlayer}</p>
+          {venue.request_id ? (
+            <p className="text-caption text-content-muted">
+              {d.fromRequest}{' '}
+              <Link
+                href={`/turf-requests?request=${venue.request_id}`}
+                className="text-content-brand underline"
+              >
+                {d.viewRequest}
+              </Link>
+            </p>
           ) : null}
         </div>
       ) : null}

@@ -10,15 +10,18 @@ what players see immediately ("synced"). The browser uses the publishable key; a
 enforced in Postgres:
 
 - `public.admins(user_id, full_name, role, activity_seen_at)` — who may use the panel.
+- `public.admin_activity_reads(admin_id, kind, ref, is_read)` — per-admin notification read overrides.
 - `require_admin()` — called first by every `admin_*` RPC (raises `42501` otherwise).
 - Admin RPCs (`security definer`, `jsonb` out): `admin_me`, `admin_dashboard`, `admin_users`,
   `admin_user`, `admin_set_user_blocked`, `admin_teams`, `admin_team`, `admin_set_team_blocked`,
   `admin_matches`, `admin_match`, `admin_cancel_match`, `admin_venues`, `admin_venue`,
   `admin_save_venue`, `admin_set_venue_status`, `admin_subscriptions`, `admin_subscription`,
-  `admin_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_team_block_appeals`, `admin_review_team_block_appeal`, `admin_areas`, `admin_save_area`,
-  `admin_delete_area`; `admin_phone_exists` (anon, forgot password).
+  `admin_activity`, `admin_set_activity_read`, `admin_mark_all_activity`, `admin_mark_activity_seen`, `admin_block_appeals`, `admin_review_block_appeal`, `admin_team_block_appeals`, `admin_review_team_block_appeal`, `admin_turf_requests`, `admin_turf_request`,
+  `admin_approve_turf_request`, `admin_reject_turf_request`, `admin_delete_turf_request`,
+  `admin_locations`, `admin_save_location`, `admin_delete_location`,
+  `admin_import_locations`; `admin_phone_exists` (anon, forgot password).
 - SQL source: `Team-Mate-App/supabase/migrations/20261103000014_admin_core.sql`,
-  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`, `…023_team_block_appeals.sql`, `…025_admin_team_appeal_flags.sql`.
+  `…015_admin_rpcs.sql`, `…017_subscription_free_offer.sql`, `…018_admin_areas.sql`, `…019_block_appeals.sql`, `…023_team_block_appeals.sql`, `…025_admin_team_appeal_flags.sql`, `…026_profile_type_location.sql`, `…027_turfs.sql`.
 
 ### How admin actions reach the app
 
@@ -43,7 +46,7 @@ subscription blocked / active / expired.
 | root | `app/layout.tsx` (fonts, `Providers`) | `/` → redirect `/dashboard` |
 | `(auth)` | `<AuthShell>` (stadium photo + form card) | `/login`, `/forgot-password` |
 | `(public)` | none (root layout only, no guard) | `/privacy-policy` |
-| `(panel)` | `<AuthGuard><AdminShell topbarEnd={<NotificationBell/><AccountMenu/>} sidebarFooter={<LogoutButton/>}>` | `/dashboard`, `/users`, `/appeals`, `/teams`, `/matches`, `/venues`, `/areas`, `/subscriptions`, `/notifications`, `/settings` |
+| `(panel)` | `<AuthGuard><AdminShell topbarEnd={<NotificationBell/><AccountMenu/>} sidebarFooter={<LogoutButton/>}>` | `/dashboard`, `/users`, `/appeals`, `/teams`, `/matches`, `/venues`, `/turf-requests`, `/locations`, `/subscriptions`, `/notifications`, `/settings` |
 
 Every `page.tsx` renders one screen from a feature barrel and sets `metadata.title`.
 
@@ -53,13 +56,14 @@ Every `page.tsx` renders one screen from a feature barrel and sets `metadata.tit
 | --- | --- |
 | `auth` | login, forgot-password (SMS code), settings (change password), `AccountMenu`, `LogoutButton`, session store, `useProfile` (`admin_me`) |
 | `legal` | public privacy policy screen and its EN + BN copy |
-| `dashboard` | overview screen + SVG charts (donut, bars, area) |
+| `dashboard` | overview screen (range picker → `admin_dashboard(p_months)`) + SVG charts (donut, bars, multi-line) + widgets (trend stats, status split, by-division bars, recents, pending actions) |
 | `users` | list, detail panel, block dialog |
 | `teams` | list, detail panel, block dialog |
 | `matches` | list (+ date range, location), detail panel with countdown + squads, cancel dialog |
-| `venues` | list, detail panel, add / edit modal with uploads to storage `venue-photos` |
+| `venues` | venues = turfs: list with Division / District / Thana filters, detail panel, add / edit modal with the app's turf form fields and uploads to storage `venue-photos` |
+| `turf-requests` | turf owners' listing requests from the app: status tabs, detail panel, approve (→ venue), reject with a reason, delete |
 | `appeals` | unblock requests from blocked players and team owners: Players / Teams switch, status tabs, approve, reject with a reason |
-| `areas` | area list (`public.areas`) with venue / player counts, add / edit / delete modal |
+| `locations` | Division → District → Thana tree (`public.divisions / districts / thanas`): level tabs, parent filters, player counts, add / edit / delete modal, CSV bulk upload |
 | `subscriptions` | list, detail panel (read-only) |
 | `notifications` | activity feed screen + `NotificationBell` |
 
@@ -74,8 +78,9 @@ detail panel)`; the first row is selected by default; the detail panel fetches i
   `AuthShell`, `admin-nav.ts` (the only place sidebar routes are listed).
 - `lib/api/supabase.ts` — the Supabase client + `rpc()` / `APIError`.
 - `lib/auth/token-storage.ts` — Supabase session storage adapter (`playmate.admin.session`).
-- `lib/hooks/use-list-state.ts` (search / filters / page / selection), `use-areas.ts`
-  (`public.areas`), `lib/constants/match-formats.ts`, `lib/utils/phone.ts` (E.164).
+- `lib/hooks/use-list-state.ts` (search / filters / page / selection), `use-locations.ts`
+  (divisions / districts / thanas), `use-venue-names.ts` (`venue_cards`),
+  `lib/constants/match-formats.ts`, `lib/constants/turf.ts` (owner roles, turf error codes), `lib/utils/phone.ts` (E.164).
 
 ## Data flow
 

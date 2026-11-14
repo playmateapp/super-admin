@@ -20,6 +20,16 @@ export interface UserRow {
   avatar_url: string;
   phone: string;
   position: string;
+  /** 'Male' | 'Female' | '' (not set). */
+  gender: string;
+  /** One of `public.profile_types` names, or ''. */
+  profile_type: string;
+  /** "Thana, District, Division, Post code" — '' when not set. */
+  location: string;
+  division: string;
+  district: string;
+  thana: string;
+  post_code: string;
   created_at: string;
   type: UserType;
   status: UserStatus;
@@ -30,6 +40,10 @@ export interface UsersParams {
   search?: string;
   type?: string;
   status?: string;
+  gender?: string;
+  profileType?: string;
+  /** Division id as a string ('' = all). */
+  division?: string;
   page: number;
   pageSize: number;
 }
@@ -37,6 +51,8 @@ export interface UsersParams {
 export interface UsersResponse {
   total: number;
   stats: { users: number; teams: number };
+  /** Filter options straight from the database. */
+  options: { profile_types: string[]; divisions: { id: number; name: string }[] };
   rows: UserRow[];
 }
 
@@ -58,6 +74,13 @@ export interface UserDetail {
   avatar_url: string;
   phone: string;
   area: string;
+  location: string;
+  division: string;
+  district: string;
+  thana: string;
+  post_code: string;
+  gender: string;
+  profile_type: string;
   position: string;
   about: string;
   date_of_birth: string | null;

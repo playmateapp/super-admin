@@ -2,16 +2,19 @@
 
 import {
   CalendarDays,
+  ChevronRight,
   CircleX,
   Crown,
   Goal,
   Handshake,
   MapPin,
+  Phone,
   Shield,
   Trophy,
   User,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 
 import {
@@ -34,10 +37,11 @@ import { commonMessages } from '@/lib/i18n';
 import { cn, formatDashedDay, formatDateMedium, formatMonthYear, interpolate } from '@/lib/utils';
 import { useMessages } from '@/providers/i18n-provider';
 
-import { useTeam } from '../hooks/queries';
+import { useTeam, useTeamContact } from '../hooks/queries';
 import { teamsMessages } from '../i18n/teams.messages';
 import type { BlockTarget } from './block-team-dialog';
 import { TeamAppealCard } from './team-appeal-card';
+import type { PersonRef } from '../types';
 
 type Tab = 'overview' | 'players' | 'matches' | 'about';
 
@@ -54,6 +58,53 @@ function RecordCell({ icon, value, label }: { icon: ReactNode; value: number; la
         <span className="text-caption text-content-muted">{label}</span>
       </span>
     </div>
+  );
+}
+
+/**
+ * Owner / captain row: avatar, role, name and phone. The whole row links to `/users?user=<id>`,
+ * which opens that player's detail panel.
+ */
+function ContactRow({ person, role }: { person: PersonRef | null | undefined; role: string }) {
+  const m = useMessages(teamsMessages);
+  const c = useMessages(commonMessages);
+  const { data: contact, isLoading } = useTeamContact(person?.id);
+
+  if (!person) {
+    return (
+      <div className="flex items-center gap-3 rounded-[10px] bg-surface-muted px-3 py-2.5">
+        <EntityAvatar src="" name="?" size={36} />
+        <span className="flex flex-col leading-tight">
+          <span className="text-caption text-content-muted">{role}</span>
+          <span className="text-body-xs text-content-muted">{m.detail.noCaptain}</span>
+        </span>
+      </div>
+    );
+  }
+
+  const phone = contact?.phone || (isLoading ? '…' : c.none);
+  return (
+    <Link
+      href={`/users?user=${person.id}`}
+      aria-label={interpolate(m.detail.openUser, { name: person.name })}
+      className="group flex items-center gap-3 rounded-[10px] border border-transparent bg-surface-muted px-3 py-2.5 outline-none transition-colors hover:border-line-brand hover:bg-surface-tint focus-visible:ring-4 focus-visible:ring-brand-500/20"
+    >
+      <EntityAvatar src={person.avatar_url} name={person.name} size={36} />
+      <span className="flex min-w-0 flex-1 flex-col leading-tight">
+        <span className="text-caption text-content-muted">{role}</span>
+        <span className="truncate font-display text-body-xs font-semibold text-content-primary">
+          {person.name || c.none}
+        </span>
+        <span className="flex items-center gap-1 text-caption text-content-secondary">
+          <Phone aria-hidden className="size-3.5" />
+          <span dir="ltr">{phone}</span>
+        </span>
+      </span>
+      <ChevronRight
+        aria-hidden
+        className="size-4 shrink-0 text-content-muted transition-transform group-hover:translate-x-0.5 rtl:rotate-180"
+      />
+    </Link>
   );
 }
 
@@ -83,6 +134,7 @@ export function TeamDetailPanel({
 
   const d = m.detail;
   const blocked = team.status === 'blocked';
+  const captain = team.players.find((p) => p.role === 'captain');
 
   return (
     <Panel className="flex flex-col gap-[18px] p-5">
@@ -137,6 +189,12 @@ export function TeamDetailPanel({
 
       {tab === 'overview' ? (
         <div className="flex flex-col gap-2 px-2.5">
+          <SectionLabel>{d.management}</SectionLabel>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <ContactRow person={team.owner} role={d.owner} />
+            <ContactRow person={captain} role={d.roleCaptain} />
+          </div>
+          <InfoDivider />
           <InfoItem icon={<MapPin />} label={d.homeGround} value={team.home_ground || c.none} />
           <InfoDivider />
           <InfoColumns

@@ -1,6 +1,18 @@
 'use client';
 
-import { CalendarDays, MapPin, Phone, Shirt, Users } from 'lucide-react';
+import {
+  Building2,
+  Cake,
+  Landmark,
+  Map as MapIcon,
+  CalendarDays,
+  GraduationCap,
+  MapPin,
+  Phone,
+  Shirt,
+  UserRound,
+  Users,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import {
@@ -24,7 +36,7 @@ import {
   VersusCard,
 } from '@/components/ui';
 import { commonMessages } from '@/lib/i18n';
-import { formatDashedDay, formatMonthYear, interpolate } from '@/lib/utils';
+import { formatDashedDay, formatDate, formatMonthYear, interpolate } from '@/lib/utils';
 import { useMessages } from '@/providers/i18n-provider';
 
 import { useUser } from '../hooks/queries';
@@ -145,11 +157,41 @@ export function UserDetailPanel({
           <div className="flex flex-col gap-2">
             <SectionLabel>{d.info}</SectionLabel>
             <InfoBox>
-              <InfoItem icon={<MapPin />} label={d.location} value={user.area || c.none} />
+              <InfoColumns
+                left={
+                  <>
+                    <InfoItem
+                      icon={<MapIcon />}
+                      label={d.division}
+                      value={user.division || c.none}
+                    />
+                    <InfoItem icon={<MapPin />} label={d.thana} value={user.thana || c.none} />
+                  </>
+                }
+                right={
+                  <>
+                    <InfoItem
+                      icon={<Building2 />}
+                      label={d.district}
+                      value={user.district || c.none}
+                    />
+                    <InfoItem
+                      icon={<Landmark />}
+                      label={d.postCode}
+                      value={user.post_code ? <span dir="ltr">{user.post_code}</span> : c.none}
+                    />
+                  </>
+                }
+              />
               <InfoDivider />
               <InfoColumns
                 left={
                   <>
+                    <InfoItem
+                      icon={<UserRound />}
+                      label={d.gender}
+                      value={user.gender ? (m.genders[user.gender] ?? user.gender) : c.none}
+                    />
                     <InfoItem
                       icon={<CalendarDays />}
                       label={d.age}
@@ -160,6 +202,20 @@ export function UserDetailPanel({
                 }
                 right={
                   <>
+                    <InfoItem
+                      icon={<GraduationCap />}
+                      label={d.profileType}
+                      value={
+                        user.profile_type
+                          ? (m.profileTypes[user.profile_type] ?? user.profile_type)
+                          : c.none
+                      }
+                    />
+                    <InfoItem
+                      icon={<Cake />}
+                      label={d.dateOfBirth}
+                      value={user.date_of_birth ? formatDate(user.date_of_birth) : c.none}
+                    />
                     <InfoItem
                       icon={<Users />}
                       label={d.currentTeam}

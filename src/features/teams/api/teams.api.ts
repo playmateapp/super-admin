@@ -1,6 +1,6 @@
 import { rpc } from '@/lib/api/supabase';
 
-import type { TeamDetail, TeamsParams, TeamsResponse } from '../types';
+import type { TeamContact, TeamDetail, TeamsParams, TeamsResponse } from '../types';
 
 /** Teams request functions (Supabase RPCs, admin-only). */
 
@@ -20,3 +20,6 @@ export const getTeam = (id: string) => rpc<TeamDetail>('admin_team', { p_id: id 
 /** rpc admin_set_team_blocked — suspends / restores a team (its managers are notified). */
 export const setTeamBlocked = (id: string, blocked: boolean) =>
   rpc<void>('admin_set_team_blocked', { p_team: id, p_blocked: blocked });
+
+/** rpc admin_user — read only for the owner / captain contact (name + phone) on the team panel. */
+export const getTeamContact = (userId: string) => rpc<TeamContact>('admin_user', { p_id: userId });

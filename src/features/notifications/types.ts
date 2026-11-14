@@ -44,6 +44,21 @@ export interface ActivityItem {
 }
 
 export interface ActivityFeed {
+  /** Unread items overall (the bell), regardless of the filters. */
   unread: number;
+  /** Items matching the filters (the list is capped at the request limit). */
+  total: number;
   items: ActivityItem[];
+}
+
+/** Date preset of the Notifications toolbar; '' = any time. */
+export type ActivityPeriod = '' | 'today' | 'yesterday' | 'week' | 'custom';
+export type ActivityReadStatus = '' | 'read' | 'unread';
+
+/** Server filter of `admin_activity`: `from` inclusive / `to` exclusive ISO timestamps. */
+export interface ActivityFilters {
+  from?: string | null;
+  to?: string | null;
+  status?: ActivityReadStatus;
+  limit?: number;
 }

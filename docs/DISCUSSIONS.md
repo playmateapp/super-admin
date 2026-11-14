@@ -104,3 +104,42 @@ the approve / reject dialogs and mutation into `teams`, the `appeals` barrel exp
 into an `Appeal`. One review flow, one cache invalidation; a narrow, documented exception to the
 "barrel imports only for session concerns" rule.
 
+## D-016 — Locations are a separate tree, not more Areas (2026-11-14)
+PM feedback asked for Division / District / Thana / Upazila + Post Code on player profiles and in
+the app's search filters, with admin-managed data and a bulk upload. The existing `areas` list
+(home ground / venue grouping, stored as text) stays as-is; the new tree lives in its own tables
+with ids so a rename never rewrites profiles and filters can match on ids. Deleting a level
+cascades to what is under it but is refused while any player uses it. Post codes are free text
+typed by players (PM: "admin not entry this"). A team's location is its creator's location
+(`team_cards` exposes the owner's ids), so teams need no location field of their own.
+
+## D-017 — Venue = turf; requests are a separate table (2026-11-14)
+PM feedback: turf owners apply from the app, admins approve / reject / delete, owners can appeal,
+and "venue and turf will be same" so the data never mismatches. Requests live in their own
+`turf_requests` table (one per user, so the home screen can show its status) and approval copies
+them into `venues` — the venue list only ever holds published, admin-owned data, and editing a
+venue never rewrites what the owner sent. The admin venue form uses exactly the request form's
+fields (location ids, role, website, Facebook, format, images; at least one image required), and
+the server validates both through the same helpers (`turf_field`, `check_turf_location`). Players
+can no longer create venues (RLS write policy dropped); the challenge picker only offers
+published venues. Areas were retired in the same change (PM: "we don't need area now, use
+location"): `areas` and its RPCs are dropped, the Matches area filter became a venue filter.
+
+## D-018 — Dashboard v2 follows the PM mock, not Figma (2026-11-14)
+
+The PM sent a dashboard mock (WhatsApp image). We matched its data exactly and used our own
+tokens/layout. Choices: trends compare each total with its value 30 days ago (not "new this
+month vs last month"); "Team Status" shows Active vs Blocked teams (the mock labelled the first
+row "Total Teams" but its 96.2% is the unblocked share); division of a team = its owner's
+division; "Others" = every division after the top 3 plus records with no division; the range
+picker drives only the revenue + growth charts (totals are all-time). Recent Payments moved off
+the dashboard because the mock drops it.
+
+## D-019 — Notifications read state is per item, not "seen on open" (2026-11-14)
+The user asked for read / unread filters and a mark-all control, which only make sense if
+opening the page does not clear everything. Read state = `admins.activity_seen_at` watermark
+(items after it are unread) plus per-item overrides in `admin_activity_reads`. Mark-all moves
+the watermark (`now()` or `-infinity`) and clears the overrides, so it stays O(1). Match items
+are keyed by their current `kind`, so a match that moves to a new stage shows up unread again.
+Date presets use the admin's local day boundaries, computed in the browser and sent as
+timestamps. Mark-all ignores the active filters on purpose (simpler, matches the button label).

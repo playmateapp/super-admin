@@ -60,6 +60,9 @@ const en = {
     noAbout: 'No description yet.',
     roleOwner: 'Owner',
     roleCaptain: 'Captain',
+    management: 'Team Management',
+    noCaptain: 'No captain assigned',
+    openUser: 'Open {name}’s profile',
     appeal: {
       title: 'Unblock request',
       from: 'From {name} · {date}',
@@ -126,6 +129,9 @@ const bn: typeof en = {
     noAbout: 'এখনও কোনো বর্ণনা নেই।',
     roleOwner: 'মালিক',
     roleCaptain: 'অধিনায়ক',
+    management: 'টিম ব্যবস্থাপনা',
+    noCaptain: 'কোনো অধিনায়ক নেই',
+    openUser: '{name} এর প্রোফাইল খুলুন',
     appeal: {
       title: 'আনব্লক অনুরোধ',
       from: '{name} পাঠিয়েছেন · {date}',
