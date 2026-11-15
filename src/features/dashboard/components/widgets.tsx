@@ -1,11 +1,12 @@
 'use client';
 
 import { isToday, isTomorrow, isYesterday } from 'date-fns';
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CalendarRange } from 'lucide-react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, CalendarRange, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 
 import { EntityAvatar, NativeSelect, Panel, StatusPill, type PillTone } from '@/components/ui';
+import { useDivisions } from '@/lib/hooks/use-locations';
 import {
   cn,
   formatClock,
@@ -243,42 +244,77 @@ export function StatusSplit({
 
 /* ------------------------------------------------------------------ divisions */
 
-/** Top 3 named divisions + "Others" (every other division and people with none set). */
+/**
+ * Top 3 named divisions + "Others" (every other division and records with none set). The
+ * "View all" toggle expands the card in place to every division — including ones at 0 — plus
+ * "Not set" (PM, 2026-11-15; D-021).
+ */
 export function DivisionCard({
   title,
   icon,
-  href,
   data,
 }: {
   title: string;
   icon: ReactNode;
-  href: string;
   data?: DivisionCount[];
 }) {
   const m = useMessages(dashboardMessages);
+  const [expanded, setExpanded] = useState(false);
+  const { data: divisions } = useDivisions();
+  const listId = useId();
   const total = (data ?? []).reduce((s, d) => s + d.count, 0);
-  const top = (data ?? [])
-    .filter((d) => d.division)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 3);
-  const rest = total - top.reduce((s, d) => s + d.count, 0);
-  const rows = [...top.map((d) => ({ label: d.division, count: d.count, main: true }))];
-  if (rest > 0) rows.push({ label: m.divisions.others, count: rest, main: false });
+  const named = (data ?? []).filter((d) => d.division);
+
+  let rows: { label: string; count: number; main: boolean }[];
+  if (expanded) {
+    const counts = new Map(named.map((d) => [d.division, d.count]));
+    // Every division from the reference list (0 when nobody is there), then any name the RPC
+    // returned that the list does not have.
+    const names = [...(divisions ?? []).map((d) => d.name), ...named.map((d) => d.division)];
+    rows = Array.from(new Set(names))
+      .map((label) => ({ label, count: counts.get(label) ?? 0, main: true }))
+      .sort((a, b) => b.count - a.count);
+    const notSet = (data ?? []).find((d) => !d.division)?.count ?? 0;
+    if (notSet > 0) rows.push({ label: m.divisions.notSet, count: notSet, main: false });
+  } else {
+    const top = [...named].sort((a, b) => b.count - a.count).slice(0, 3);
+    const rest = total - top.reduce((s, d) => s + d.count, 0);
+    rows = top.map((d) => ({ label: d.division, count: d.count, main: true }));
+    if (rest > 0) rows.push({ label: m.divisions.others, count: rest, main: false });
+  }
+
+  const toggle = data?.length ? (
+    <button
+      type="button"
+      aria-expanded={expanded}
+      aria-controls={listId}
+      onClick={() => setExpanded((v) => !v)}
+      className="flex shrink-0 items-center gap-1 rounded text-caption text-content-link hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-line-brand"
+    >
+      {expanded ? m.showLess : m.viewAll}
+      <ChevronDown
+        aria-hidden
+        className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
+      />
+    </button>
+  ) : null;
 
   return (
-    <DashCard title={title} icon={icon} href={href}>
+    <DashCard title={title} icon={icon} aside={toggle}>
       {rows.length === 0 ? (
         <p className="py-6 text-center text-body-xs text-content-muted">
           {data ? m.divisions.empty : '—'}
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul id={listId} className="flex flex-col gap-3">
           {rows.map((r, i) => (
             <li
               key={r.label}
               className="grid grid-cols-[96px_1fr_auto] items-center gap-3 font-display"
             >
-              <span className="truncate text-body-xs text-content-primary">{r.label}</span>
+              <span className="truncate text-body-xs text-content-primary" title={r.label}>
+                {r.label}
+              </span>
               <span
                 className="h-2 overflow-hidden rounded-pill bg-surface-muted"
                 role="presentation"

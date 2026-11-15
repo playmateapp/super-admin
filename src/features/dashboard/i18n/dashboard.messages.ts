@@ -87,6 +87,7 @@ const en = {
     total: '{count} pending',
   },
   viewAll: 'View all',
+  showLess: 'Show less',
   /** `one` is used when count = 1. */
   ago: {
     now: 'Just now',
@@ -185,6 +186,7 @@ const bn: typeof en = {
     total: '{count}টি অপেক্ষমাণ',
   },
   viewAll: 'সব দেখুন',
+  showLess: 'কম দেখুন',
   ago: {
     now: 'এইমাত্র',
     minute: { one: '{count} মিনিট আগে', other: '{count} মিনিট আগে' },

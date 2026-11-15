@@ -2,6 +2,30 @@
 
 Newest first. One entry per task: date, task, then Added / Changed / Fixed / Notes.
 
+## 2026-11-15 — Dashboard: division cards expand in place
+
+**Changed**
+- Players / Teams / Turfs by Division: "View all" no longer opens /users, /teams or /venues. It
+  expands the card in place to every division (0 for empty ones) plus "Not set", and
+  "Show less" collapses it back to top 3 + Others (D-021). Has `aria-expanded`.
+- EN + BN copy: `showLess`.
+
+## 2026-11-15 — Dashboard data fix + optional venue fields
+
+**Fixed**
+- Dashboard showed no data: the panel calls `admin_dashboard(p_months)`, but app migration
+  `20261114000028_admin_dashboard_v2.sql` had never been applied, so the live DB only had the old
+  no-argument `admin_dashboard()` and every call failed. Applied 028; it was checked as an admin
+  and returns totals, growth, revenue, status splits, divisions, recents and pending counts.
+  Every other `admin_*` RPC the panel calls was also checked against the live DB (all present).
+
+**Changed**
+- Add / Edit Venue: owner name, match format and turf images are now optional (labelled
+  "(Optional)"). New venues start with no format selected; tapping the selected chip clears it.
+  Removed the "at least one image" check and its `photoRequired` copy (D-020).
+- App migration `20261115000032_admin_venue_optional_fields.sql` (applied): `admin_save_venue`
+  no longer requires owner name, format or a photo.
+
 ## 2026-11-14 — Notifications: date / read filters + read / unread
 
 **Added**

@@ -263,23 +263,23 @@ export function DashboardScreen() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         <DivisionCard
           title={m.divisions.players}
           icon={<UserRound />}
-          href="/users"
+
           data={data?.divisions?.players}
         />
         <DivisionCard
           title={m.divisions.teams}
           icon={<UsersRound />}
-          href="/teams"
+
           data={data?.divisions?.teams}
         />
         <DivisionCard
           title={m.divisions.turfs}
           icon={<LandPlot />}
-          href="/venues"
+
           data={data?.divisions?.turfs}
         />
       </div>

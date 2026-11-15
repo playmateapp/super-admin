@@ -11,12 +11,12 @@ Scope of this repo: the PlayMate **Super Admin** panel (Figma page "dart me", ad
 | 0 | Setup | Reset from Moddhanno: skeleton, tokens, shell, primitives, docs | — | — | ✅ 2026-11-03 |
 | 1 | Auth | Sign in + error popups | 18483:1430, 2664–2862 | `/login` | ✅ 2026-11-03 |
 | 2 | Auth | Forgot password → SMS code → reset → success | 18483:1490–2414 | `/forgot-password` | ✅ 2026-11-03 |
-| 3 | Dashboard | Totals + 30-day trends, growth (players/teams/turfs), revenue, subscription donut, player/team status, by division, recent players/matches, pending actions | PM mock 2026-11-14 | `/dashboard` | ✅ 2026-11-14 (v2; needs migration 028 live) |
+| 3 | Dashboard | Totals + 30-day trends, growth (players/teams/turfs), revenue, subscription donut, player/team status, by division, recent players/matches, pending actions | PM mock 2026-11-14 | `/dashboard` | ✅ 2026-11-15 (v2; migration 028 live) |
 | 4 | Users | List + filters, detail (overview / stats / photos / about), block | 18483:3014–5381 | `/users` | ✅ 2026-11-03 |
 | 4b | Appeals | Unblock requests (players + teams): filter, approve, reject with reason | no design | `/appeals` | ✅ 2026-11-06, teams 2026-11-12 |
 | 5 | Teams | List + filters, detail (overview / players / matches / about), block | 18483:5714–7487 | `/teams` | ✅ 2026-11-03 |
 | 6 | Matches | List + 4 filters, detail (details / players), countdown, admin cancel | 18483:7849–9551 | `/matches` | ✅ 2026-11-03 |
-| 7 | Venues | List + filters, detail (details / photos), add / edit modal, inactive | 18483:9939–10702 | `/venues` | ✅ 2026-11-03 |
+| 7 | Venues | List + filters, detail (details / photos), add / edit modal, inactive | 18483:9939–10702 | `/venues` | ✅ 2026-11-15 (owner, format, images optional — D-020) |
 | 7a | Turf Requests | Owners' listing requests: status tabs, detail, approve → venue, reject with reason (owner appeals), delete | no design (app frames 18502:*) | `/turf-requests` | ✅ 2026-11-14 |
 | 7b | ~~Areas~~ | Removed 2026-11-14 (PM: location replaces area) | — | — | ❌ removed |
 | 7c | Locations | Division / District / Thana tabs, parent filters, add / edit / delete, CSV bulk upload | no design | `/locations` | ✅ 2026-11-14 |

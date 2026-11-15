@@ -7,12 +7,13 @@ import type { Venue, VenueInput } from '../types';
  * Add / Edit Venue form — the same fields as the app's "Turf Listing Interest Form" (turf name,
  * owner name, role, contact number, Division / District / Thana, post code, full address,
  * website, Facebook page, match format) so admin venues and approved requests match.
+ * Owner name, match format and turf images are optional for admins (migration 032).
  * Location ids are kept as strings for the native selects; `toVenueInput` converts them.
  */
 export const venueSchema = (e: VenuesMessages['errors']) =>
   z.object({
     name: z.string().trim().min(1, e.required),
-    owner_name: z.string().trim().min(1, e.required),
+    owner_name: z.string().trim(),
     owner_role: z.string(),
     phone: z
       .string()
@@ -25,7 +26,7 @@ export const venueSchema = (e: VenuesMessages['errors']) =>
     address: z.string().trim().min(1, e.required),
     website: z.string().trim(),
     facebook: z.string().trim(),
-    format: z.string().min(1, e.required),
+    format: z.string(),
   });
 export type VenueFormValues = z.infer<ReturnType<typeof venueSchema>>;
 
@@ -41,7 +42,7 @@ export const emptyVenueForm: VenueFormValues = {
   address: '',
   website: '',
   facebook: '',
-  format: '7-a-side',
+  format: '',
 };
 
 const idText = (v: number | null) => (v == null ? '' : String(v));
@@ -58,7 +59,7 @@ export const venueToForm = (v: Venue): VenueFormValues => ({
   address: v.address,
   website: v.website,
   facebook: v.facebook,
-  format: v.format || '7-a-side',
+  format: v.format,
 });
 
 export const toVenueInput = (

@@ -29,9 +29,10 @@ import {
 /**
  * Add / Edit Venue (Figma "All Venues || Add Venue" / "Edit venues" layout) with the fields of
  * the app's Turf Listing Interest Form, so admin venues and approved turf requests hold the same
- * data: cover + turf images (at least one), turf name, owner name, role, contact number,
+ * data: cover + turf images, turf name, owner name, role, contact number,
  * Division / District / Thana, post code, full address, website, Facebook page and the
- * match-format chips — see docs/DISCUSSIONS.md D-017.
+ * match-format chips — see docs/DISCUSSIONS.md D-017. Owner name, match format and images are
+ * optional for admins (D-020); tapping the selected format chip clears it.
  */
 export function VenueFormModal({
   open,
@@ -60,7 +61,6 @@ export function VenueFormModal({
     defaultValues: emptyVenueForm,
   });
 
-  const [photoError, setPhotoError] = useState(false);
   const divisionId = form.watch('division_id');
   const districtId = form.watch('district_id');
   const { data: divisions } = useDivisions();
@@ -77,7 +77,6 @@ export function VenueFormModal({
     form.reset(values);
     setCover(venue?.photo_url ?? '');
     setPhotos(venue?.photos ?? []);
-    setPhotoError(false);
   }, [open, venue, form]);
 
   useEffect(() => {
@@ -107,25 +106,17 @@ export function VenueFormModal({
 
   const onCover = async (e: ChangeEvent<HTMLInputElement>) => {
     const [url] = await uploadFiles(e.target.files);
-    if (url) {
-      setCover(url);
-      setPhotoError(false);
-    }
+    if (url) setCover(url);
     e.target.value = '';
   };
 
   const onGallery = async (e: ChangeEvent<HTMLInputElement>) => {
     const urls = await uploadFiles(e.target.files);
     setPhotos((prev) => [...prev, ...urls]);
-    if (urls.length) setPhotoError(false);
     e.target.value = '';
   };
 
   const onSubmit = async (values: VenueFormValues) => {
-    if (!cover && photos.length === 0) {
-      setPhotoError(true);
-      return;
-    }
     try {
       const id = await save.mutateAsync({
         id: venue?.id ?? null,
@@ -195,8 +186,8 @@ export function VenueFormModal({
         <div className="grid gap-4 sm:grid-cols-2">
           <TextInput<VenueFormValues>
             name="owner_name"
-            required
             label={f.owner}
+            optionalLabel={f.optional}
             placeholder={f.ownerPlaceholder}
           />
           <SelectInput<VenueFormValues>
@@ -299,7 +290,7 @@ export function VenueFormModal({
 
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 font-display text-body-xs font-medium text-content-primary">
-            {f.format} <span className="text-danger">*</span>
+            {f.format} <span className="font-normal text-content-muted">{f.optional}</span>
           </legend>
           <div className="flex flex-wrap gap-2 rounded-[10px] bg-surface-muted p-2">
             {MATCH_FORMATS.map((fmt) => (
@@ -307,7 +298,9 @@ export function VenueFormModal({
                 key={fmt}
                 type="button"
                 aria-pressed={format === fmt}
-                onClick={() => form.setValue('format', fmt, { shouldDirty: true })}
+                onClick={() =>
+                  form.setValue('format', format === fmt ? '' : fmt, { shouldDirty: true })
+                }
                 className={cn(
                   'h-[31px] rounded-[30px] border px-3 text-body-xs transition-colors',
                   format === fmt
@@ -323,7 +316,7 @@ export function VenueFormModal({
 
         <div className="flex flex-col gap-2">
           <span className="font-display text-body-xs font-medium text-content-primary">
-            {f.gallery} <span className="text-danger">*</span>
+            {f.gallery} <span className="font-normal text-content-muted">{f.optional}</span>
           </span>
           <span className="text-caption text-content-muted">{f.galleryHint}</span>
           <div className="grid grid-cols-4 gap-2">
@@ -365,11 +358,6 @@ export function VenueFormModal({
             hidden
             onChange={onGallery}
           />
-          {photoError ? (
-            <p role="alert" className="text-body-xs text-danger">
-              {f.photoRequired}
-            </p>
-          ) : null}
         </div>
 
         <Button type="submit" className="w-full" disabled={save.isPending || upload.isPending}>

@@ -143,3 +143,19 @@ the watermark (`now()` or `-infinity`) and clears the overrides, so it stays O(1
 are keyed by their current `kind`, so a match that moves to a new stage shows up unread again.
 Date presets use the admin's local day boundaries, computed in the browser and sent as
 timestamps. Mark-all ignores the active filters on purpose (simpler, matches the button label).
+
+## D-020 — Admin venues: owner name, match format and images optional (2026-11-15)
+User request: when an admin creates a venue, owner name, match format and turf images must be
+optional. Partly reverses D-017's "same fields as the request form": admins often list a turf
+before they have the owner's details or photos. `admin_save_venue` (app migration 032) dropped
+the `turf_owner_required`, `turf_format_required` and `turf_photo_required` checks; the columns
+already default to `''` / `'{}'`. The app's turf request form (`submit_turf_request`) still
+requires them. New venues start with no format chip selected; tapping the selected chip clears
+it. The list and detail panel already fall back to a placeholder image and "—".
+
+## D-021 — Division cards expand in place (2026-11-15)
+PM: "View all" on Players / Teams / Turfs by Division should expand the card and show every
+division, not open another page. Collapsed = top 3 + "Others" (unchanged). Expanded = every
+division from the reference `divisions` table (so empty ones show 0), sorted by count, then
+"Not set" for records with no division. Percentages stay out of the card's total. The division
+grid uses `items-start` so one expanded card doesn't stretch its neighbours. No RPC change.
